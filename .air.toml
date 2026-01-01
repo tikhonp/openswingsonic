@@ -1,0 +1,10 @@
+root = "."
+tmp_dir = "/tmp"
+
+[build]
+pre_cmd = []
+cmd = "go build -o /tmp/main main.go"
+bin = "/tmp/main"
+include_ext = ["go", "templ"]
+exclude_regex = ["_templ\\.go"]
+exclude_dir = []
