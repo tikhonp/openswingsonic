@@ -5,8 +5,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"slices"
 
 	"github.com/tikhonp/openswingsonic/internal/swingmusic/models"
@@ -68,6 +70,39 @@ func (c *swingMusicClient) GetAuthed(authCookie string) SwingMusicClientAuthed {
 	}
 }
 
+// doRequest is a helper function to perform HTTP requests and parse JSON responses.
+func doRequest[Response any](c *swingMusicClientAuthed, method, url string, body io.Reader) (*Response, error) {
+	// Create HTTP request
+	request, err := http.NewRequest(method, url, body)
+	if err != nil {
+		log.Println("Error creating HTTP request:", err)
+		return nil, err
+	}
+
+	// Add authentication cookie
+	request.AddCookie(c.authCookie)
+
+	// Set headers and perform the request
+	request.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		log.Println("Error making HTTP request:", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("HTTP request failed with status: " + resp.Status)
+	}
+
+	// Decode JSON response
+	var response Response
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		log.Println("Error decoding JSON response:", err)
+		return nil, err
+	}
+	return &response, nil
+}
+
 // FolderContents retrieves the contents of the specified folder.
 // note "$home" can be used to refer the root music folder.
 func (c *swingMusicClientAuthed) FolderContents(folder string) (folders *models.Folders, err error) {
@@ -88,29 +123,21 @@ func (c *swingMusicClientAuthed) FolderContents(folder string) (folders *models.
 		return nil, err
 	}
 
-	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
+	return doRequest[models.Folders](c, http.MethodPost, url, bytes.NewBuffer(jsonData))
+}
+
+func (c *swingMusicClientAuthed) AllArtists() (artists *models.Artists, err error) {
+	u, err := url.Parse(c.baseURL + "/getall/artists")
 	if err != nil {
-		log.Println("Error creating HTTP request:", err)
+		log.Println("Error parsing URL:", err)
 		return nil, err
 	}
-	request.AddCookie(c.authCookie)
-	request.Header.Set("Content-Type", "application/json")
-	resp, err := http.DefaultClient.Do(request)
-	if err != nil {
-		log.Println("Error making POST request:", err)
-		return nil, err
-	}
+	query := u.Query()
+	query.Set("start", "0")
+	query.Set("limit", "10000")
+	query.Set("sortby", "created_date")
+	query.Set("reverse", "1")
+	u.RawQuery = query.Encode()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("folder contents request failed with status: " + resp.Status)
-	}
-
-	var folderResponse models.Folders
-	err = json.NewDecoder(resp.Body).Decode(&folderResponse)
-	if err != nil {
-		log.Println("Error decoding JSON response:", err)
-		return nil, err
-	}
-
-	return &folderResponse, nil
+	return doRequest[models.Artists](c, http.MethodGet, u.String(), nil)
 }

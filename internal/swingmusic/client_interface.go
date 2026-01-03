@@ -19,4 +19,7 @@ type SwingMusicClient interface {
 type SwingMusicClientAuthed interface {
 	// GetFolderContents retrieves the contents of the specified folder.
 	FolderContents(folder string) (folders *models.Folders, err error)
+
+	// GetAllArtists retrieves all artists from the server.
+	AllArtists() (artists *models.Artists, err error)
 }
