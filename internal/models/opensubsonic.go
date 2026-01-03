@@ -18,9 +18,15 @@ type SubsonicError struct {
 	Message string `json:"message"`
 }
 
+func (e SubsonicError) Error() string {
+	return e.Message
+}
+
+type SubsonicErrorResponseContents struct {
+	SubsonicBase
+	Error SubsonicError `json:"error"`
+}
+
 type SubsonicErrorResponse struct {
-	Contents struct {
-		SubsonicBase
-		Error SubsonicError `json:"error"`
-	} `json:"subsonic-response"`
+	Contents SubsonicErrorResponseContents `json:"subsonic-response"`
 }
