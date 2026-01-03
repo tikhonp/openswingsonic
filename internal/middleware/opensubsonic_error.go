@@ -1,10 +1,12 @@
-package util
+// Package middleware provides middleware functions for handling OpenSubsonic API errors.
+package middleware
 
 import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/tikhonp/openswingsonic/internal/models"
+	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
+	"github.com/tikhonp/openswingsonic/internal/util"
 )
 
 type OpenSubsonicError = models.SubsonicError
@@ -24,23 +26,46 @@ var (
 	TheRequestedDataWasNotFound              = OpenSubsonicError{Code: 70, Message: "The requested data was not found."}
 )
 
-func ErrorHandler(err error, c echo.Context) {
-	println("ErrorHandler called with error:", err.Error())
-	if c.Response().Committed {
-		return
-	}
-	errSubsonic, ok := err.(OpenSubsonicError)
-	if !ok {
-		c.Logger().Errorf("Unhandled error type: %T, error: %v", err, err)
-		errSubsonic = GenericError
-	}
-	err = c.JSON(http.StatusOK, models.SubsonicErrorResponse{
-		Contents: models.SubsonicErrorResponseContents{
-			SubsonicBase: GetBaseResponse(),
-			Error:        errSubsonic,
-		},
-	})
-	if err != nil {
-		c.Logger().Error(err)
+func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		err := next(c)
+		if err == nil {
+			return nil
+		}
+
+		// Prevent double-handling if response committed
+		if c.Response().Committed {
+			return nil
+		}
+
+		if httpErr, ok := err.(*echo.HTTPError); ok {
+			if httpErr.Code == http.StatusNotFound {
+				err = TheRequestedDataWasNotFound
+			}
+		}
+
+		errSubsonic, ok := err.(OpenSubsonicError)
+		if !ok {
+			c.Logger().Errorf("Unhandled error type: %T, error: %v", err, err)
+			errSubsonic = GenericError
+		}
+
+		base := util.GetBaseResponse()
+		response := map[string]any{
+			"subsonic-response": map[string]any{
+				"status":        "failed",
+				"version":       base.Version,
+				"type":          base.Type,
+				"serverVersion": base.Version,
+				"openSubsonic":  base.OpenSubsonic,
+				"error":         errSubsonic,
+			},
+		}
+		err = c.JSON(http.StatusOK, response)
+		if err != nil {
+			c.Logger().Error(err)
+		}
+
+		return nil
 	}
 }

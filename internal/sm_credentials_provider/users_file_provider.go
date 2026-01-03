@@ -3,6 +3,8 @@ package smcredentialsprovider
 import (
 	"os"
 	"strings"
+
+	"github.com/tikhonp/openswingsonic/internal/db/models/auth"
 )
 
 type usersFileCredentialsProvider struct {
@@ -11,7 +13,7 @@ type usersFileCredentialsProvider struct {
 
 // ReadUsersFile reads the users file and returns a map of username to password.
 // The users file should have lines in the format: username:password
-func ReadUsersFile(usersFilePath string) (map[string]string, error) {
+func readUsersFile(usersFilePath string) (map[string]string, error) {
 	content, err := os.ReadFile(usersFilePath)
 	if err != nil {
 		return nil, err
@@ -40,12 +42,16 @@ func ReadUsersFile(usersFilePath string) (map[string]string, error) {
 // that reads credentials from the specified users file.
 //
 // The users file should have lines in the format: username:password
-func NewUsersFileCredentialsProvider(usersFilePath string) (SMCredentialsProvider, error) {
-	users, err := ReadUsersFile(usersFilePath)
+func NewUsersFileCredentialsProvider(usersFilePath string, users auth.Users) (SMCredentialsProvider, error) {
+	usersMap, err := readUsersFile(usersFilePath)
 	if err != nil {
 		return nil, err
 	}
-	return &usersFileCredentialsProvider{users: users}, nil
+	err = users.BatchUpsertUsers(usersMap)
+	if err != nil {
+		return nil, err
+	}
+	return &usersFileCredentialsProvider{users: usersMap}, nil
 }
 
 func (p *usersFileCredentialsProvider) GetPasswordForUsername(username string) (string, error) {

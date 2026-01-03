@@ -13,11 +13,15 @@ type Session struct {
 	UserID       int       `db:"user_id"`
 	SessionToken string    `db:"session_token"`
 	CreatedAt    time.Time `db:"created_at"`
+	ExpiresAt    time.Time `db:"expires_at"`
 }
 
 type Sessions interface {
 	// GetSessionByUsername retrieves a session by the associated user's username
 	GetSessionByUsername(username string) (*Session, error)
+
+	// InsertSession creates a new session for the specified username
+	InsertSession(username, sessionToken string, expiresAt time.Time) error
 }
 
 type sessions struct {
@@ -34,6 +38,8 @@ func (s sessions) GetSessionByUsername(username string) (*Session, error) {
 		SELECT s.* FROM sessions s
 		JOIN swingmusic_users u ON s.user_id = u.id
 		WHERE u.username = $1
+		ORDER BY s.created_at DESC
+		LIMIT 1
 	`
 	err := s.db.Get(&session, query, username)
 	if err != nil {
@@ -43,4 +49,17 @@ func (s sessions) GetSessionByUsername(username string) (*Session, error) {
 		return nil, err
 	}
 	return &session, nil
+}
+
+func (s sessions) InsertSession(username, sessionToken string, expiresAt time.Time) error {
+	query := `
+		INSERT INTO sessions (user_id, session_token, expires_at)
+		VALUES (
+			(SELECT id FROM swingmusic_users WHERE username = $1),
+			$2,
+			$3
+		)
+	`
+	_, err := s.db.Exec(query, username, sessionToken, expiresAt)
+	return err
 }

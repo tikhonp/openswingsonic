@@ -2,12 +2,14 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/tikhonp/openswingsonic/internal/config"
 	"github.com/tikhonp/openswingsonic/internal/db"
+	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi"
 	opensubsonicauth "github.com/tikhonp/openswingsonic/internal/middleware/opensubsonic_auth"
 	smcredentialsprovider "github.com/tikhonp/openswingsonic/internal/sm_credentials_provider"
 	"github.com/tikhonp/openswingsonic/internal/swingmusic"
@@ -15,11 +17,12 @@ import (
 )
 
 func credentialProvider(cfg *config.Config, database db.ModelsFactory) (smcredentialsprovider.SMCredentialsProvider, error) {
+	log.Println("Using credentials provider type:", cfg.CredentialsProvider)
 	switch cfg.CredentialsProvider {
 	case config.CredentialsProviderTypeDatabase:
 		return smcredentialsprovider.NewDBCredentialsProvider(database.AuthUsers()), nil
 	case config.CredentialsProviderTypeFile:
-		return smcredentialsprovider.NewUsersFileCredentialsProvider(cfg.UsersFilePath)
+		return smcredentialsprovider.NewUsersFileCredentialsProvider(cfg.UsersFilePath, database.AuthUsers())
 	default:
 		return nil, errors.New("unknown credentials provider type")
 	}
@@ -41,7 +44,6 @@ func main() {
 	e.Debug = cfg.Debug
 	e.HideBanner = true
 	e.Validator = util.NewDefaultValidator()
-	e.HTTPErrorHandler = util.ErrorHandler
 
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
@@ -55,12 +57,7 @@ func main() {
 		e.Logger.Fatal("Failed to initialize credentials provider: ", err)
 	}
 	osauth := opensubsonicauth.NewOpenSubsonicAuth(database.AuthSessions(), client, credentialProvider)
-
-	protected := e.Group("/rest", opensubsonicauth.Middleware(osauth))
-
-	protected.GET("/ping.view", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
-	})
+	opensubsonicapi.ConfigureOpenSubsonicRoutes(e.Group("/rest"), osauth, client)
 
 	e.Logger.Fatal(e.Start(cfg.Addr))
 }

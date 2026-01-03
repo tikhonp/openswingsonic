@@ -2,15 +2,17 @@ package opensubsonicauth
 
 import (
 	"crypto/md5"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/tikhonp/openswingsonic/internal/db/models/auth"
+	"github.com/tikhonp/openswingsonic/internal/middleware"
 	smcredentialsprovider "github.com/tikhonp/openswingsonic/internal/sm_credentials_provider"
 	"github.com/tikhonp/openswingsonic/internal/swingmusic"
-	"github.com/tikhonp/openswingsonic/internal/util"
 )
 
 type OpenSubsonicAuth interface {
@@ -44,13 +46,13 @@ func NewOpenSubsonicAuth(
 // **) If apiKey is specified, then none of p, t, s, nor u can be specified.
 func (osa *openSubsonicAuth) validateData(p authParams) error {
 	if p.APIKey != "" && (p.U != "" || p.P != "" || p.T != "" || p.S != "") {
-		return &util.MultipleConflictingAuthMechanisms
+		return &middleware.MultipleConflictingAuthMechanisms
 	}
 	if p.U != "" && p.P != "" && (p.APIKey != "" || p.T != "" || p.S != "") {
-		return &util.MultipleConflictingAuthMechanisms
+		return &middleware.MultipleConflictingAuthMechanisms
 	}
 	if p.U != "" && p.T != "" && p.S != "" && (p.APIKey != "" || p.P != "") {
-		return &util.MultipleConflictingAuthMechanisms
+		return &middleware.MultipleConflictingAuthMechanisms
 	}
 	return nil
 }
@@ -58,7 +60,7 @@ func (osa *openSubsonicAuth) validateData(p authParams) error {
 func (osa *openSubsonicAuth) authentificateByUP(u, p string) (string, error) {
 	password, err := osa.credentials.GetPasswordForUsername(u)
 	if err != nil {
-		return "", util.WrongUsernameOrPassword
+		return "", middleware.WrongUsernameOrPassword
 	}
 
 	// p is the password, either in clear text or hex-encoded with a “enc:” prefix.
@@ -67,13 +69,13 @@ func (osa *openSubsonicAuth) authentificateByUP(u, p string) (string, error) {
 		decoded, err := hex.DecodeString(p[4:])
 		if err != nil {
 			log.Println("Failed to decode hex password:", err)
-			return "", util.WrongUsernameOrPassword
+			return "", middleware.WrongUsernameOrPassword
 		}
 		p = string(decoded)
 	}
 
 	if password != p {
-		return "", util.WrongUsernameOrPassword
+		return "", middleware.WrongUsernameOrPassword
 	}
 
 	return osa.getSessionKeyForUser(u, password)
@@ -82,7 +84,7 @@ func (osa *openSubsonicAuth) authentificateByUP(u, p string) (string, error) {
 func (osa *openSubsonicAuth) authentificateByUTS(u, t, s string) (string, error) {
 	password, err := osa.credentials.GetPasswordForUsername(u)
 	if err != nil {
-		return "", util.WrongUsernameOrPassword
+		return "", middleware.WrongUsernameOrPassword
 	}
 
 	// From doc
@@ -101,7 +103,7 @@ func (osa *openSubsonicAuth) authentificateByUTS(u, t, s string) (string, error)
 	hashBytes := md5.Sum([]byte(password + s))
 	expectedToken := hex.EncodeToString(hashBytes[:])
 	if expectedToken != t {
-		return "", util.WrongUsernameOrPassword
+		return "", middleware.WrongUsernameOrPassword
 	}
 
 	return osa.getSessionKeyForUser(u, password)
@@ -109,24 +111,34 @@ func (osa *openSubsonicAuth) authentificateByUTS(u, t, s string) (string, error)
 
 func (osa *openSubsonicAuth) authentificateByAPIKey(_ string) (string, error) {
 	// API key authentication is not supported for now
-	return "", util.TokenAuthNotSupported
+	return "", middleware.TokenAuthNotSupported
+}
+
+func (osa *openSubsonicAuth) createNewSession(username, password string) (string, error) {
+	cookie, err := osa.swingmusic.Login(username, password)
+	if err != nil {
+		return "", err
+	}
+
+	err = osa.sessions.InsertSession(username, cookie.Value, cookie.Expires)
+	if err != nil {
+		return "", err
+	}
+
+	return cookie.Value, nil
 }
 
 func (osa *openSubsonicAuth) getSessionKeyForUser(username, password string) (string, error) {
-	_, err := osa.sessions.GetSessionByUsername(username)
-	if errors.Is(err, smcredentialsprovider.ErrUserNotFound) {
-		cookieString, err := osa.swingmusic.Login(username, password)
-		if err != nil {
-			return "", err
-		}
-		println("Received cookie string:", cookieString)
-		// TODO: implment firther
+	session, err := osa.sessions.GetSessionByUsername(username)
+	if errors.Is(err, sql.ErrNoRows) {
+		return osa.createNewSession(username, password)
+	} else if err != nil {
+		return "", err
 	}
-	if err != nil {
-
+	if session.ExpiresAt.Before(time.Now().Add(-5 * time.Minute)) {
+		return osa.createNewSession(username, password)
 	}
-
-	return "", nil
+	return session.SessionToken, nil
 }
 
 func (osa *openSubsonicAuth) Authentificate(params authParams) (string, error) {
@@ -145,6 +157,6 @@ func (osa *openSubsonicAuth) Authentificate(params authParams) (string, error) {
 		// API key authentication
 		return osa.authentificateByAPIKey(params.APIKey)
 	} else {
-		return "", util.RequiredParametrIsMissing
+		return "", middleware.RequiredParametrIsMissing
 	}
 }

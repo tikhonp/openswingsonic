@@ -1,17 +1,18 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE swingmusic_users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(256) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(256) NOT NULL UNIQUE,
     password VARCHAR(256) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE sessions (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER REFERENCES swingmusic_users(id),
     session_token VARCHAR(512) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL
 );
 -- +goose StatementEnd
 
