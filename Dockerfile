@@ -2,8 +2,8 @@ ARG GO_VERSION=1.25.5
 ARG ALPINE_VERSION=3.23
 
 
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS dev
-RUN apk add --no-cache gcc musl-dev
+FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS dev
+RUN apk add --no-cache build-base
 VOLUME /storage
 ENV LISTEN_ADDR=":1991"
 ENV DATABASE_PATH="/storage/openswingmusic.db"
@@ -17,17 +17,15 @@ RUN go mod download && go mod verify
 CMD ["air", "-c", ".air.toml"]
 
 
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
-ARG TARGETOS
-ARG TARGETARCH
+FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
 ARG APP_VERSION
-RUN apk add --no-cache gcc musl-dev
+RUN apk add --no-cache build-base
 WORKDIR /app
 RUN --mount=type=cache,target=/go/pkg/mod/ \
     --mount=type=bind,target=. \
-    CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    CGO_ENABLED=1 \
     go build \
-        -ldflags "-X github.com/tikhonp/openswingsonic/internal/util.AppVersion=${APP_VERSION}"\
+        -ldflags "-X github.com/tikhonp/openswingsonic/internal/util.AppVersion=${APP_VERSION}" \
         -o /bin/oswingsonic main.go
 
 
