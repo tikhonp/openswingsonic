@@ -36,6 +36,7 @@ FROM alpine:${ALPINE_VERSION} AS prod
 ARG VERSION
 ARG BUILD_DATE
 ARG VCS_REF
+ARG APP_VERSION
 
 LABEL org.opencontainers.image.title="OpenSwingMusic"
 LABEL org.opencontainers.image.description="A translation layer allowing clients compatible with Open Subsonic API to work with Swing Music"

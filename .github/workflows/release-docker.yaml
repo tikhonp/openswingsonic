@@ -43,10 +43,11 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          target: prod
           push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
-            VERSION=${{ steps.version.outputs.tag }}
+            APP_VERSION=${{ steps.version.outputs.tag }}
             BUILD_DATE=${{ github.event.release.published_at }}
             VCS_REF=${{ github.sha }}
           tags: |
