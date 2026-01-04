@@ -29,6 +29,8 @@ func credentialProvider(cfg *config.Config, database db.ModelsFactory) (smcreden
 }
 
 func main() {
+	log.Printf("OpenSwingSonic: version \"%s\"", util.AppVersion)
+
 	cfg := config.ReadConfig()
 
 	database, err := db.Connect(cfg.DatabasePath)
