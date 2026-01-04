@@ -7,7 +7,7 @@ RUN apk add --no-cache build-base
 VOLUME /storage
 ENV LISTEN_ADDR=":1991"
 ENV DATABASE_PATH="/storage/openswingmusic.db"
-ENV CREDENTIALS_PROVIDER="database"
+ENV CRED_PROVIDER="database"
 ENV CGO_ENABLED=1
 RUN go install "github.com/air-verse/air@latest" && \
     go install "github.com/pressly/goose/v3/cmd/goose@latest"
@@ -36,18 +36,18 @@ ARG BUILD_DATE
 ARG VCS_REF
 ARG APP_VERSION
 
-LABEL org.opencontainers.image.title="OpenSwingMusic"
-LABEL org.opencontainers.image.description="A translation layer allowing clients compatible with Open Subsonic API to work with Swing Music"
-LABEL org.opencontainers.image.version=${APP_VERSION}
-LABEL org.opencontainers.image.source="https://github.com/tikhonp/openswingsonic"
-LABEL org.opencontainers.image.licenses="AGPL-3.0"
-LABEL org.opencontainers.image.created=${BUILD_DATE}
-LABEL org.opencontainers.image.revision=${VCS_REF}
+LABEL org.opencontainers.image.title="OpenSwingMusic" \
+      org.opencontainers.image.description="A translation layer allowing clients compatible with Open Subsonic API to work with Swing Music" \
+      org.opencontainers.image.version=${APP_VERSION} \
+      org.opencontainers.image.source="https://github.com/tikhonp/openswingsonic" \
+      org.opencontainers.image.licenses="AGPL-3.0" \
+      org.opencontainers.image.created=${BUILD_DATE} \
+      org.opencontainers.image.revision=${VCS_REF}
 
 VOLUME /storage
 ENV LISTEN_ADDR=":1991"
 ENV DATABASE_PATH="/storage/openswingmusic.db"
-ENV CREDENTIALS_PROVIDER="database"
+ENV CRED_PROVIDER="database"
 
 EXPOSE 1991
 WORKDIR /app

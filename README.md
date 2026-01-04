@@ -16,7 +16,7 @@ services:
     environment:
       - DEBUG=true
       - SWINGSONIC_BASE_URL=https://m...
-      - CREDENTIALS_PROVIDER=file
+      - CRED_PROVIDER=file
       - USERS_FILE_PATH=users
     dns:
       - 8.8.8.8

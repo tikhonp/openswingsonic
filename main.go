@@ -23,6 +23,8 @@ func credentialProvider(cfg *config.Config, database db.ModelsFactory) (smcreden
 		return smcredentialsprovider.NewDBCredentialsProvider(database.AuthUsers()), nil
 	case config.CredentialsProviderTypeFile:
 		return smcredentialsprovider.NewUsersFileCredentialsProvider(cfg.UsersFilePath, database.AuthUsers())
+	case config.CredentialsProviderTypeEnv:
+		return smcredentialsprovider.NewEnvCredentialsProvider(database.AuthUsers())
 	default:
 		return nil, errors.New("unknown credentials provider type")
 	}

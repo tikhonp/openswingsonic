@@ -13,6 +13,8 @@ const (
 	CredentialsProviderTypeFile CredentialsProviderType = "file"
 	// CredentialsProviderTypeDatabase indicates that credentials are provided via a database.
 	CredentialsProviderTypeDatabase CredentialsProviderType = "database"
+	// CredentialsProviderTypeEnv indicates that credentials are provided via environment variables.
+	CredentialsProviderTypeEnv CredentialsProviderType = "env"
 )
 
 type Config struct {
@@ -52,14 +54,14 @@ func ReadConfig() *Config {
 	if swingsonicBaseURL == "" {
 		log.Fatalln("FATAL: SWINGSONIC_BASE_URL not set")
 	}
-	credentialsProvider := CredentialsProviderType(os.Getenv("CREDENTIALS_PROVIDER"))
+	credentialsProvider := CredentialsProviderType(os.Getenv("CRED_PROVIDER"))
 	if credentialsProvider == "" {
-		log.Println("WARNING: CREDENTIALS_PROVIDER not set, defaulting to 'database'")
+		log.Println("WARNING: CRED_PROVIDER not set, defaulting to 'database'")
 		credentialsProvider = CredentialsProviderTypeDatabase
 	}
 	usersFilePath := os.Getenv("USERS_FILE_PATH")
 	if credentialsProvider == CredentialsProviderTypeFile && usersFilePath == "" {
-		log.Fatalln("FATAL: USERS_FILE_PATH not set, required when CREDENTIALS_PROVIDER is 'file'")
+		log.Fatalln("FATAL: USERS_FILE_PATH not set, required when CRED_PROVIDER is 'file'")
 	}
 	return &Config{
 		Debug:               os.Getenv("DEBUG") == "true",
