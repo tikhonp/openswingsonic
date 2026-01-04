@@ -54,4 +54,4 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:${{ steps.version.outputs.tag }}
             ghcr.io/${{ github.repository }}:latest
-          outputs: type=registry,description="OpenSwingMusic release ${{ steps.version.outputs.tag }}"
+          outputs: type=registry,description=OpenSwingMusic release ${{ steps.version.outputs.tag }}
