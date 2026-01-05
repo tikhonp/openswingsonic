@@ -57,7 +57,9 @@ func mapArtistsToIndexes(in *smmodels.Artists) osmodels.Indexes {
 // https://opensubsonic.netlify.app/docs/endpoints/getindexes/
 //
 // TODO: implement full api
-//  You only need additional endpoints if you later want:
+//
+//	You only need additional endpoints if you later want:
+//
 // child entries (songs inside indexes) → not required
 // shortcut folders → needs folder metadata
 // starred artists → needs favorites API
@@ -67,7 +69,7 @@ func (h *BrowsingHandler) GetIndexes(c echo.Context) error {
 	// musicFolderId
 	// ifModifiedSince
 
-	artists, err := h.GetAuthedClient(c).AllArtists()
+	artists, err := h.GetAuthedClient(c).AllArtists("name", false)
 	if err != nil {
 		return err
 	}

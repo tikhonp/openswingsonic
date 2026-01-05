@@ -33,10 +33,13 @@ func ConfigureOpenSubsonicRoutes(
 	g.GET("/getOpenSubsonicExtensions.view", systemHandler.GetOpenSubsonicExtensions)
 	protected.GET("/tokenInfo.view", systemHandler.TokenInfo)
 
-	// Browsing	getIndexes getMusicDirectory getGenres getArtists getArtist getAlbum getSong getVideos getVideoInfo getArtistInfo getArtistInfo2 getAlbumInfo getAlbumInfo2 getSimilarSongs getSimilarSongs2 getTopSongs
+	// Browsing	getArtist getAlbum getSong getVideos getVideoInfo getArtistInfo getArtistInfo2 getAlbumInfo getAlbumInfo2 getSimilarSongs getSimilarSongs2 getTopSongs
 	browsingHandler := browsing.BrowsingHandler{Handler: handler}
 	protected.GET("/getMusicFolders.view", browsingHandler.GetMusicFolders)
 	protected.GET("/getIndexes.view", browsingHandler.GetIndexes)
+	protected.GET("/getMusicDirectory.view", browsingHandler.GetMusicDirectory)
+	protected.GET("/getGenres.view", browsingHandler.GetGenres)
+	protected.GET("/getArtists.view", browsingHandler.GetArtists)
 
 	// Album/song lists	getAlbumList getAlbumList2 getRandomSongs getSongsByGenre getNowPlaying getStarred getStarred2
 

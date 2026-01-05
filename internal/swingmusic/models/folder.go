@@ -42,6 +42,8 @@ type Track struct {
 	Title        string   `json:"title"`
 	Trackhash    string   `json:"trackhash"`
 	Weakhash     string   `json:"weakhash"`
+	Disc         int64    `json:"disc"`
+	Track        int64    `json:"track"`
 }
 
 type Artist struct {
@@ -65,4 +67,17 @@ type Extra struct {
 type Hashinfo struct {
 	Algo   string `json:"algo"`
 	Format string `json:"format"`
+}
+
+type DirBrowserResponse struct {
+	Folders []DirBrowserItem `json:"folders"`
+}
+
+type DirBrowserItem struct {
+	Name string `json:"name"`
+	Path string `json:"path"`
+}
+
+type FolderTrackResponse struct {
+	Tracks []Track `json:"tracks"`
 }

@@ -28,3 +28,4 @@ Makefile
 .air.toml
 .github/
 test.rest
+test/
