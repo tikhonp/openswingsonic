@@ -60,13 +60,11 @@ func mapArtistsToArtistsID3(in *smmodels.Artists) osmodels.ArtistsID3 {
 //
 // https://opensubsonic.netlify.app/docs/endpoints/getartists/
 func (h *BrowsingHandler) GetArtists(c echo.Context) error {
-	println("GetArtists called")
 	// musicFolderId is optional and ignored for now
 	artists, err := h.GetAuthedClient(c).AllArtists("name", false)
 	if err != nil {
 		return err
 	}
-
 	data := mapArtistsToArtistsID3(artists)
 	return utils.RenderResponse(c, "artists", data)
 }

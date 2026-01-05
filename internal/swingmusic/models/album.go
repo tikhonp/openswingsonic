@@ -54,7 +54,7 @@ type AlbumShortInfo struct {
 	AlbumArtists []Artist `json:"albumartists"`
 	AlbumHash    string   `json:"albumhash"`
 	Color        string   `json:"color"`
-	Date         int64    `json:"date"`
+	Date         int      `json:"date"`
 	Image        string   `json:"image"`
 	PathHash     string   `json:"pathhash"`
 	Title        string   `json:"title"`

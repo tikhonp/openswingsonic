@@ -4,7 +4,9 @@ package opensubsonicapi
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers"
+	albumsonglists "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/album_song_lists"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/browsing"
+	mediaretrival "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/media_retrival"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/system"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
 	opensubsonicauth "github.com/tikhonp/openswingsonic/internal/middleware/opensubsonic_auth"
@@ -33,21 +35,36 @@ func ConfigureOpenSubsonicRoutes(
 	g.GET("/getOpenSubsonicExtensions.view", systemHandler.GetOpenSubsonicExtensions)
 	protected.GET("/tokenInfo.view", systemHandler.TokenInfo)
 
-	// Browsing	getArtist getAlbum getSong getVideos getVideoInfo getArtistInfo getArtistInfo2 getAlbumInfo getAlbumInfo2 getSimilarSongs getSimilarSongs2 getTopSongs
+	// Browsing	getVideos getVideoInfo getSimilarSongs getSimilarSongs2
 	browsingHandler := browsing.BrowsingHandler{Handler: handler}
 	protected.GET("/getMusicFolders.view", browsingHandler.GetMusicFolders)
 	protected.GET("/getIndexes.view", browsingHandler.GetIndexes)
 	protected.GET("/getMusicDirectory.view", browsingHandler.GetMusicDirectory)
 	protected.GET("/getGenres.view", browsingHandler.GetGenres)
 	protected.GET("/getArtists.view", browsingHandler.GetArtists)
+	protected.GET("/getArtist.view", browsingHandler.GetArtist)
+	protected.GET("/getAlbum.view", browsingHandler.GetAlbum)
+	protected.GET("/getSong.view", browsingHandler.GetSong)
+	protected.GET("/getArtistInfo.view", browsingHandler.GetArtistInfo)
+	protected.GET("/getArtistInfo2.view", browsingHandler.GetArtistInfo)
+	protected.GET("/getAlbumInfo.view", browsingHandler.GetAlbumInfo)
+	protected.GET("/getAlbumInfo2.view", browsingHandler.GetAlbumInfo)
+	protected.GET("/getTopSongs.view", browsingHandler.GetTopSongs)
 
-	// Album/song lists	getAlbumList getAlbumList2 getRandomSongs getSongsByGenre getNowPlaying getStarred getStarred2
+	// Album/song lists	getRandomSongs getSongsByGenre getNowPlaying getStarred getStarred2
+	albumSongListsHandler := albumsonglists.AlbumSongListsHandler{Handler: handler}
+	protected.GET("/getAlbumList.view", albumSongListsHandler.GetAlbumList)
+	protected.GET("/getAlbumList2.view", albumSongListsHandler.GetAlbumList)
 
 	// Searching	search search2 search3
 
 	// Playlists	getPlaylists getPlaylist createPlaylist updatePlaylist deletePlaylist
 
-	// Media retrieval	stream download hls getCaptions getCoverArt getLyrics getAvatar getLyricsBySongId
+	// Media retrieval hls getCaptions getLyrics getAvatar getLyricsBySongId
+	mediaRetrivalHandler := mediaretrival.MediaRetrivalHandler{Handler: handler}
+	protected.GET("/getCoverArt.view", mediaRetrivalHandler.GetCoverArt)
+	protected.GET("/stream.view", mediaRetrivalHandler.Stream)
+	protected.GET("/download.view", mediaRetrivalHandler.Stream)
 
 	// Media annotation	star unstar setRating scrobble
 

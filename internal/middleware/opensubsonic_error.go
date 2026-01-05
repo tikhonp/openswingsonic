@@ -2,10 +2,12 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
+	"github.com/tikhonp/openswingsonic/internal/swingmusic"
 	"github.com/tikhonp/openswingsonic/internal/util"
 )
 
@@ -42,6 +44,10 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 			if httpErr.Code == http.StatusNotFound {
 				err = TheRequestedDataWasNotFound
 			}
+		}
+
+		if errors.Is(err, swingmusic.ErrNotFound) {
+			err = TheRequestedDataWasNotFound
 		}
 
 		errSubsonic, ok := err.(OpenSubsonicError)

@@ -16,3 +16,10 @@ type AlbumOtherVersionsRequest struct {
 	AlbumHash    string `json:"albumhash"`
 	OgAlbumTitle string `json:"og_album_title"`
 }
+
+type StreamedFileHeaders struct {
+	ContentType        string
+	ContentLength      int
+	ContentDisposition string
+	ContentRange       string
+}

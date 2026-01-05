@@ -16,6 +16,10 @@ import (
 	"github.com/tikhonp/openswingsonic/internal/swingmusic/models"
 )
 
+var (
+	ErrNotFound = errors.New("requested resource not found")
+)
+
 // swingMusicClient implements the SwingMusicClient interface.
 type swingMusicClient struct {
 	baseURL string
@@ -57,6 +61,32 @@ func (c *swingMusicClient) Login(username, password string) (authCookie *http.Co
 	return cookies[indxOfAuthCookie], nil
 }
 
+func (c *swingMusicClient) GetAlbumImageURL(albumHash string, size ImageSize) string {
+	if size == ImageSizeLarge {
+		return fmt.Sprintf("%s/img/thumbnail/%s.webp", c.baseURL, albumHash)
+	}
+	return fmt.Sprintf("%s/img/thumbnail/%s/%s.webp", c.baseURL, size, albumHash)
+}
+
+func (c *swingMusicClient) GetArtistImageURL(artistHash string, size ImageSize) string {
+	if size == ImageSizeLarge {
+		return fmt.Sprintf("%s/img/artist/%s.webp", c.baseURL, artistHash)
+	}
+	return fmt.Sprintf("%s/img/artist/%s/%s.webp", c.baseURL, size, artistHash)
+}
+
+func (c *swingMusicClient) GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error) {
+	url := fmt.Sprintf("%s/img/thumbnail/%s", c.baseURL, thumbnailID)
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return "", nil, fmt.Errorf("failed to get thumbnail, status: %s", resp.Status)
+	}
+	return resp.Header.Get("Content-Type"), resp.Body, nil
+}
+
 // swingMusicClientAuthed implements the SwingMusicClientAuthed interface.
 type swingMusicClientAuthed struct {
 	*swingMusicClient
@@ -88,7 +118,10 @@ func doRequest[Response any](c *swingMusicClientAuthed, method, url string, body
 		log.Println("Error making HTTP request:", err)
 		return nil, err
 	}
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode >= 400 {
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, ErrNotFound
+		}
 		return nil, fmt.Errorf("HTTP request failed with status: %s", resp.Status)
 	}
 
@@ -297,4 +330,101 @@ func (c *swingMusicClientAuthed) SearchAll(query string, limit int) (*models.Sea
 	u.RawQuery = q.Encode()
 
 	return doRequest[models.SearchedAll](c, http.MethodGet, u.String(), nil)
+}
+
+func (c *swingMusicClientAuthed) Stats() (*models.Stats, error) {
+	url := c.baseURL + "/logger/stats"
+	return doRequest[models.Stats](c, http.MethodGet, url, nil)
+}
+
+func (c *swingMusicClientAuthed) TopTracks(duration, orderBy string, limit int) (*models.TopTracks, error) {
+	u, err := url.Parse(c.baseURL + "/logger/top-tracks")
+	if err != nil {
+		return nil, err
+	}
+	q := u.Query()
+	q.Set("duration", duration)
+	q.Set("orderBy", orderBy)
+	q.Set("limit", strconv.Itoa(limit))
+	u.RawQuery = q.Encode()
+
+	return doRequest[models.TopTracks](c, http.MethodGet, u.String(), nil)
+}
+
+func (c *swingMusicClientAuthed) TopAlbums(duration, orderBy string, limit int) (*models.TopAlbums, error) {
+	u, err := url.Parse(c.baseURL + "/logger/top-albums")
+	if err != nil {
+		return nil, err
+	}
+	q := u.Query()
+	q.Set("duration", duration)
+	q.Set("orderBy", orderBy)
+	q.Set("limit", strconv.Itoa(limit))
+	u.RawQuery = q.Encode()
+	return doRequest[models.TopAlbums](c, http.MethodGet, u.String(), nil)
+}
+
+func (c *swingMusicClientAuthed) TopArtists(duration, orderBy string, limit int) (*models.TopArtists, error) {
+	u, err := url.Parse(c.baseURL + "/logger/top-artists")
+	if err != nil {
+		return nil, err
+	}
+	q := u.Query()
+	q.Set("duration", duration)
+	q.Set("orderBy", orderBy)
+	q.Set("limit", strconv.Itoa(limit))
+	u.RawQuery = q.Encode()
+
+	return doRequest[models.TopArtists](c, http.MethodGet, u.String(), nil)
+}
+
+func (c *swingMusicClientAuthed) LogTrack(req *models.LogTrackRequest) error {
+	url := c.baseURL + "/logger/track/log"
+
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+	_, err = doRequest[any](c, http.MethodPost, url, bytes.NewBuffer(jsonData))
+	return err
+}
+
+func (c *swingMusicClientAuthed) Stream(trackhash, filepath, rangeHeader string) (*models.StreamedFileHeaders, io.ReadCloser, error) {
+	u, err := url.Parse(fmt.Sprintf("%s/file/%s/legacy", c.baseURL, trackhash))
+	if err != nil {
+		return nil, nil, err
+	}
+	q := u.Query()
+	q.Set("filepath", filepath)
+	q.Set("container", "flac")
+	q.Set("quality", "original")
+	u.RawQuery = q.Encode()
+
+	request, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	request.AddCookie(c.authCookie)
+	if rangeHeader != "" {
+		request.Header.Set("Range", rangeHeader)
+	}
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, nil, err
+	}
+	if resp.StatusCode >= 400 {
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, nil, ErrNotFound
+		}
+		return nil, nil, fmt.Errorf("HTTP request failed with status: %s", resp.Status)
+	}
+	headers := &models.StreamedFileHeaders{
+		ContentType:        resp.Header.Get("Content-Type"),
+		ContentDisposition: resp.Header.Get("Content-Disposition"),
+		ContentRange:       resp.Header.Get("Content-Range"),
+	}
+	if resp.ContentLength != -1 {
+		headers.ContentLength = int(resp.ContentLength)
+	}
+	return headers, resp.Body, nil
 }

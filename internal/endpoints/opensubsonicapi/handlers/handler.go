@@ -17,3 +17,7 @@ func NewHandler(sm swingmusic.SwingMusicClient) *Handler {
 func (h *Handler) GetAuthedClient(c echo.Context) swingmusic.SwingMusicClientAuthed {
 	return h.sm.GetAuthed(c.Get("sessionKey").(string))
 }
+
+func (h *Handler) GetClient() swingmusic.SwingMusicClient {
+	return h.sm
+}

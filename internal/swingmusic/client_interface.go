@@ -1,9 +1,18 @@
 package swingmusic
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/tikhonp/openswingsonic/internal/swingmusic/models"
+)
+
+type ImageSize string
+
+const (
+	ImageSizeSmall  ImageSize = "small"
+	ImageSizeMedium ImageSize = "medium"
+	ImageSizeLarge  ImageSize = "large"
 )
 
 // SwingMusicClient defines the interface for interacting with the Swing Music server.
@@ -13,6 +22,16 @@ type SwingMusicClient interface {
 
 	// GetAuthed returns an authenticated client using the provided authentication cookie.
 	GetAuthed(authCookie string) SwingMusicClientAuthed
+
+	// GetAlbumCoverURL returns the URL for the album cover image of the specified size.
+	GetAlbumImageURL(albumHash string, size ImageSize) string
+
+	// GetArtistImageURL returns the URL for the artist image of the specified size.
+	GetArtistImageURL(artistHash string, size ImageSize) string
+
+	// GetThumbnailByID returns the URL for the thumbnail image with the given ID.
+	// returns content type, image reader and error if any.
+	GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error)
 }
 
 // SwingMusicClientAuthed defines the interface for an authenticated Swing Music client.
@@ -79,4 +98,33 @@ type SwingMusicClientAuthed interface {
 	// SearchAll performs a search for tracks, albums, and artists matching the given query.
 	// limit arg specifies the maximum number of results to return for each type.
 	SearchAll(query string, limit int) (*models.SearchedAll, error)
+
+	// Stats returns overall user statistics.
+	Stats() (*models.Stats, error)
+
+	// TopTracks returns the top N albums played within a given duration.
+	// duration arg can be "week", "month", "year", "alltime"
+	// orderBy arg can be "playcount" or "playduration"
+	// limit arg specifies the maximum number of results to return.
+	TopTracks(duration, orderBy string, limit int) (*models.TopTracks, error)
+
+	// TopAlbums returns the top N albums played within a given duration.
+	// duration arg can be "week", "month", "year", "alltime"
+	// orderBy arg can be "playcount" or "playduration"
+	// limit arg specifies the maximum number of results to return.
+	TopAlbums(duration, orderBy string, limit int) (*models.TopAlbums, error)
+
+	// TopArtists returns the top N artists played within a given duration.
+	// duration arg can be "week", "month", "year", "alltime"
+	// orderBy arg can be "playcount" or "playduration"
+	// limit arg specifies the maximum number of results to return.
+	TopArtists(duration, orderBy string, limit int) (*models.TopArtists, error)
+
+	// LogTrack logs a track play to the server.
+	// use it to implement scrobbles.
+	LogTrack(req *models.LogTrackRequest) error
+
+	// Stream streams the media file located at the given filepath and with assosiated trackhash.
+	// rangeHeader arg is the value of the "Range" HTTP header for partial content requests.
+	Stream(trackhash, filepath, rangeHeader string) (*models.StreamedFileHeaders, io.ReadCloser, error)
 }

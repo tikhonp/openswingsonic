@@ -22,15 +22,15 @@ type ArtistResponse struct {
 }
 
 type ArtistDetail struct {
-	AlbumCount int64   `json:"albumcount"`
+	AlbumCount int     `json:"albumcount"`
 	ArtistHash string  `json:"artisthash"`
 	Color      string  `json:"color"`
-	Duration   int64   `json:"duration"`
+	Duration   int     `json:"duration"`
 	Genres     []Genre `json:"genres"`
 	Image      string  `json:"image"`
 	IsFavorite bool    `json:"is_favorite"`
 	Name       string  `json:"name"`
-	TrackCount int64   `json:"trackcount"`
+	TrackCount int     `json:"trackcount"`
 	Type       string  `json:"type"`
 }
 

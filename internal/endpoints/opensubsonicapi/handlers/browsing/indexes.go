@@ -73,10 +73,6 @@ func (h *BrowsingHandler) GetIndexes(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	println("Total artists fetched:", len(artists.Items))
-
 	indexes := mapArtistsToIndexes(artists)
-
 	return utils.RenderResponse(c, "indexes", indexes)
 }
