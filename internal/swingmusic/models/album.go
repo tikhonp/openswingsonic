@@ -28,7 +28,7 @@ type AlbumInfo struct {
 	Date         util.Timestamp `json:"date"`
 	Duration     int            `json:"duration"`
 	Extra        any            `json:"extra"` // usually empty object
-	FavUserIDs   []string       `json:"fav_userids"`
+	FavUserIDs   []int          `json:"fav_userids"`
 	GenreHashes  string         `json:"genrehashes"`
 	Genres       []Genre        `json:"genres"`
 	ID           int            `json:"id"`
