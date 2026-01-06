@@ -49,7 +49,9 @@ func main() {
 	e.HideBanner = true
 	e.Validator = util.NewDefaultValidator()
 
-	e.Use(middleware.RequestLogger())
+	e.Use(middleware.RequestLoggerWithConfig(
+		util.GetRequestLoggerConfig(cfg),
+	))
 	e.Use(middleware.Recover())
 
 	e.GET("/", func(c echo.Context) error {

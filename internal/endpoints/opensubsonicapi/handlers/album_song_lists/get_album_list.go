@@ -168,7 +168,6 @@ func (h *AlbumSongListsHandler) getRandomAlbums(client interface {
 	}
 
 	// Shuffle the albums
-	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(allAlbums.Items), func(i, j int) {
 		allAlbums.Items[i], allAlbums.Items[j] = allAlbums.Items[j], allAlbums.Items[i]
 	})

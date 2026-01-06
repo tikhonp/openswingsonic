@@ -39,6 +39,9 @@ type Config struct {
 	// UsersFilePath specifies the path to the users file. Optional.
 	// User if users file provider is used.
 	UsersFilePath string
+
+	// JSONLog enables JSON formatted logging.
+	JSONLog bool
 }
 
 func ReadConfig() *Config {
@@ -70,5 +73,6 @@ func ReadConfig() *Config {
 		SwingsonicBaseURL:   swingsonicBaseURL,
 		CredentialsProvider: credentialsProvider,
 		UsersFilePath:       usersFilePath,
+		JSONLog:             os.Getenv("JSON_LOG") == "true",
 	}
 }

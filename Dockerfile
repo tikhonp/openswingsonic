@@ -3,27 +3,25 @@ ARG ALPINE_VERSION=3.23
 
 
 FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS dev
-RUN apk add --no-cache build-base
 VOLUME /storage
 ENV LISTEN_ADDR=":1991"
 ENV DATABASE_PATH="/storage/openswingmusic.db"
 ENV CRED_PROVIDER="database"
-ENV CGO_ENABLED=1
-RUN go install "github.com/air-verse/air@latest" && \
-    go install "github.com/pressly/goose/v3/cmd/goose@latest"
+RUN go install "github.com/air-verse/air@latest"
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 CMD ["air", "-c", ".air.toml"]
 
 
-FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
 ARG APP_VERSION
-RUN apk add --no-cache build-base
+ARG TARGETOS
+ARG TARGETARCH
 WORKDIR /app
 RUN --mount=type=cache,target=/go/pkg/mod/ \
     --mount=type=bind,target=. \
-    CGO_ENABLED=1 \
+    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build \
         -ldflags "-X github.com/tikhonp/openswingsonic/internal/util.AppVersion=${APP_VERSION}" \
         -o /bin/oswingsonic main.go
@@ -47,7 +45,7 @@ LABEL org.opencontainers.image.title="OpenSwingMusic" \
 VOLUME /storage
 ENV LISTEN_ADDR=":1991"
 ENV DATABASE_PATH="/storage/openswingmusic.db"
-ENV CRED_PROVIDER="database"
+ENV CRED_PROVIDER="env"
 
 EXPOSE 1991
 WORKDIR /app
