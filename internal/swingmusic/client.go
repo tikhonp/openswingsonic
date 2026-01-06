@@ -254,14 +254,14 @@ func (c *swingMusicClientAuthed) AllArtists(sortBy string, reverse bool) (*model
 	return doRequest[models.Artists](c, http.MethodGet, u.String(), nil)
 }
 
-func (c *swingMusicClientAuthed) AllAlbums(sortBy string, reverse bool) (*models.Albums, error) {
+func (c *swingMusicClientAuthed) AllAlbums(sortBy string, reverse bool, offset, limit int) (*models.Albums, error) {
 	u, err := url.Parse(c.baseURL + "/getall/albums")
 	if err != nil {
 		return nil, err
 	}
 	q := u.Query()
-	q.Set("start", "0")
-	q.Set("limit", "1000000") // large number to get all tracks
+	q.Set("start", strconv.Itoa(offset))
+	q.Set("limit", strconv.Itoa(limit))
 	q.Set("sortby", sortBy)
 	if reverse {
 		q.Set("reverse", "1")

@@ -7,17 +7,17 @@ type AlbumID3WithSongs struct {
 	Name                string            `json:"name"`
 	Version             string            `json:"version"`
 	Artist              string            `json:"artist"`
-	Year                int64             `json:"year"`
+	Year                int               `json:"year"`
 	CoverArt            string            `json:"coverArt"`
 	Starred             time.Time         `json:"starred"`
-	Duration            int64             `json:"duration"`
-	PlayCount           int64             `json:"playCount"`
+	Duration            int               `json:"duration"`
+	PlayCount           int               `json:"playCount"`
 	Genre               string            `json:"genre"`
 	Created             time.Time         `json:"created"`
 	ArtistID            string            `json:"artistId"`
-	SongCount           int64             `json:"songCount"`
+	SongCount           int               `json:"songCount"`
 	Played              time.Time         `json:"played"`
-	UserRating          int64             `json:"userRating"`
+	UserRating          int               `json:"userRating"`
 	RecordLabels        []Genre           `json:"recordLabels"`
 	MusicBrainzID       string            `json:"musicBrainzId"`
 	Genres              []Genre           `json:"genres"`
@@ -42,11 +42,6 @@ type AlbumID3WithSongs struct {
 type ArtistFromAlbum struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
-}
-
-type DiscTitle struct {
-	Disc  int64  `json:"disc"`
-	Title string `json:"title"`
 }
 
 type ReleaseDate struct {

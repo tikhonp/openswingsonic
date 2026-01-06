@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/swingmusic"
@@ -40,20 +41,35 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 			return nil
 		}
 
-		if httpErr, ok := err.(*echo.HTTPError); ok {
+		var errMessage string
+		var errSubsonic OpenSubsonicError
+		var invalidValidationError *validator.InvalidValidationError
+		var validationErrors validator.ValidationErrors
+		var httpErr *echo.HTTPError
+
+		if errors.As(err, &httpErr) {
 			if httpErr.Code == http.StatusNotFound {
-				err = TheRequestedDataWasNotFound
+				errSubsonic = TheRequestedDataWasNotFound
+				errMessage = err.Error()
+			} else {
+				errSubsonic = GenericError
+				errMessage = GenericError.Message
 			}
-		}
-
-		if errors.Is(err, swingmusic.ErrNotFound) {
-			err = TheRequestedDataWasNotFound
-		}
-
-		errSubsonic, ok := err.(OpenSubsonicError)
-		if !ok {
+		} else if errors.Is(err, swingmusic.ErrNotFound) {
+			errSubsonic = TheRequestedDataWasNotFound
+			errMessage = TheRequestedDataWasNotFound.Message
+		} else if errors.As(err, &invalidValidationError) {
+			errSubsonic = RequiredParametrIsMissing
+			errMessage = invalidValidationError.Error()
+		} else if errors.As(err, &validationErrors) {
+			errSubsonic = RequiredParametrIsMissing
+			errMessage = validationErrors.Error()
+		} else if errors.As(err, &errSubsonic) {
+			errMessage = errSubsonic.Message
+		} else {
 			c.Logger().Errorf("Unhandled error type: %T, error: %v", err, err)
 			errSubsonic = GenericError
+			errMessage = GenericError.Message
 		}
 
 		base := util.GetBaseResponse()
@@ -64,9 +80,13 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 				"type":          base.Type,
 				"serverVersion": base.Version,
 				"openSubsonic":  base.OpenSubsonic,
-				"error":         errSubsonic,
+				"error": map[string]any{
+					"code":    errSubsonic.Code,
+					"message": errMessage,
+				},
 			},
 		}
+
 		err = c.JSON(http.StatusOK, response)
 		if err != nil {
 			c.Logger().Error(err)

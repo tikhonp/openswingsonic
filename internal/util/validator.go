@@ -2,8 +2,6 @@
 package util
 
 import (
-	"net/http"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -16,7 +14,7 @@ func (cv *DefaultValidator) Validate(i any) error {
 	if err := cv.validator.Struct(i); err != nil {
 		// Optionally, you could return the error to give each route more control over the status code
 		// TODO: fire error by opensabsonic api scheme
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return err
 	}
 	return nil
 }
@@ -24,4 +22,3 @@ func (cv *DefaultValidator) Validate(i any) error {
 func NewDefaultValidator() echo.Validator {
 	return &DefaultValidator{validator: validator.New()}
 }
-

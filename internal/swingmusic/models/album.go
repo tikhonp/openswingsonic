@@ -1,5 +1,7 @@
 package models
 
+import "github.com/tikhonp/openswingsonic/internal/util"
+
 type AlbumResponse struct {
 	Copyright     string                      `json:"copyright"`
 	Extra         AlbumExtra                  `json:"extra"`
@@ -16,32 +18,32 @@ type AlbumExtra struct {
 }
 
 type AlbumInfo struct {
-	Score        float64  `json:"_score"`
-	AlbumArtists []Artist `json:"albumartists"`
-	AlbumHash    string   `json:"albumhash"`
-	ArtistHashes []string `json:"artisthashes"`
-	BaseTitle    string   `json:"base_title"`
-	Color        string   `json:"color"`
-	CreatedDate  int64    `json:"created_date"`
-	Date         int64    `json:"date"`
-	Duration     int64    `json:"duration"`
-	Extra        any      `json:"extra"` // usually empty object
-	FavUserIDs   []string `json:"fav_userids"`
-	GenreHashes  string   `json:"genrehashes"`
-	Genres       []Genre  `json:"genres"`
-	ID           int64    `json:"id"`
-	Image        string   `json:"image"`
-	IsFavorite   bool     `json:"is_favorite"`
-	LastPlayed   int64    `json:"lastplayed"`
-	OGTitle      string   `json:"og_title"`
-	PathHash     string   `json:"pathhash"`
-	PlayCount    int64    `json:"playcount"`
-	PlayDuration int64    `json:"playduration"`
-	Title        string   `json:"title"`
-	TrackCount   int64    `json:"trackcount"`
-	Type         string   `json:"type"`
-	Versions     []any    `json:"versions"`
-	WeakHash     string   `json:"weakhash"`
+	Score        float64        `json:"_score"`
+	AlbumArtists []Artist       `json:"albumartists"`
+	AlbumHash    string         `json:"albumhash"`
+	ArtistHashes []string       `json:"artisthashes"`
+	BaseTitle    string         `json:"base_title"`
+	Color        string         `json:"color"`
+	CreatedDate  util.Timestamp `json:"created_date"`
+	Date         util.Timestamp `json:"date"`
+	Duration     int            `json:"duration"`
+	Extra        any            `json:"extra"` // usually empty object
+	FavUserIDs   []string       `json:"fav_userids"`
+	GenreHashes  string         `json:"genrehashes"`
+	Genres       []Genre        `json:"genres"`
+	ID           int            `json:"id"`
+	Image        string         `json:"image"`
+	IsFavorite   bool           `json:"is_favorite"`
+	LastPlayed   util.Timestamp `json:"lastplayed"`
+	OGTitle      string         `json:"og_title"`
+	PathHash     string         `json:"pathhash"`
+	PlayCount    int            `json:"playcount"`
+	PlayDuration int            `json:"playduration"`
+	Title        string         `json:"title"`
+	TrackCount   int            `json:"trackcount"`
+	Type         string         `json:"type"`
+	Versions     []string       `json:"versions"`
+	WeakHash     string         `json:"weakhash"`
 }
 
 type Genre struct {

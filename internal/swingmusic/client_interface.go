@@ -53,7 +53,8 @@ type SwingMusicClientAuthed interface {
 	// sortBy arg sort keys:
 	// 		duration, created_date, playcount, playduration, lastplayed, trackcount, title, albumartists, date
 	// reverse arg indicates whether to sort in descending order.
-	AllAlbums(sortBy string, reverse bool) (*models.Albums, error)
+	// offset and limit args are used for pagination.
+	AllAlbums(sortBy string, reverse bool, offset, limit int) (*models.Albums, error)
 
 	// Artist returns artist data, tracks and genres for the given artisthash.
 	Artist(artistHash string) (*models.ArtistResponse, error)

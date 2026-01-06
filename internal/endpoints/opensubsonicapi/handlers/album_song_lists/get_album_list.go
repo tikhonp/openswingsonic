@@ -2,357 +2,273 @@ package albumsonglists
 
 import (
 	"math/rand"
-	"strconv"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
-	"github.com/tikhonp/openswingsonic/internal/middleware"
+	"github.com/tikhonp/openswingsonic/internal/swingmusic"
 	smmodels "github.com/tikhonp/openswingsonic/internal/swingmusic/models"
 )
 
-// mapAlbumShortInfoToAlbum converts a SwingMusic AlbumShortInfo to OpenSubsonic AlbumID3
-func mapAlbumShortInfoToAlbum(album *smmodels.AlbumShortInfo) osmodels.AlbumID3 {
-	osAlbum := osmodels.AlbumID3{
-		ID:       album.AlbumHash,
-		Name:     album.Title,
-		Title:    album.Title,
-		Album:    album.Title,
-		IsDir:    true,
-		CoverArt: album.Image,
-		Year:     album.Date,
-	}
+type AlbumListType string
 
-	// Set artist information
-	if len(album.AlbumArtists) > 0 {
-		osAlbum.Artist = album.AlbumArtists[0].Name
-		osAlbum.ArtistID = album.AlbumArtists[0].Artisthash
-		osAlbum.Parent = album.AlbumArtists[0].Artisthash
-	}
+const (
+	AlbumListTypeRandom               AlbumListType = "random"
+	AlbumListTypeNewest               AlbumListType = "newest"
+	AlbumListTypeHighest              AlbumListType = "highest"
+	AlbumListTypeFrequent             AlbumListType = "frequent"
+	AlbumListTypeRecent               AlbumListType = "recent"
+	AlbumListTypeAlphabeticalByName   AlbumListType = "alphabeticalByName"
+	AlbumListTypeAlphabeticalByArtist AlbumListType = "alphabeticalByArtist"
+	AlbumListTypeStarred              AlbumListType = "starred"
+	AlbumListTypeByYear               AlbumListType = "byYear"
+	AlbumListTypeByGenre              AlbumListType = "byGenre"
+)
 
-	return osAlbum
-}
-
-// mapAlbumInfoToAlbum converts a SwingMusic AlbumInfo to OpenSubsonic AlbumID3
-func mapAlbumInfoToAlbum(album *smmodels.AlbumInfo) osmodels.AlbumID3 {
-	osAlbum := osmodels.AlbumID3{
-		ID:        album.AlbumHash,
-		Name:      album.Title,
-		Title:     album.Title,
-		Album:     album.Title,
-		IsDir:     true,
-		CoverArt:  album.Image,
-		SongCount: int(album.TrackCount),
-		Duration:  int(album.Duration),
-		PlayCount: int(album.PlayCount),
-	}
-
-	// Convert Unix timestamp to ISO8601 format
-	if album.CreatedDate > 0 {
-		osAlbum.Created = time.Unix(album.CreatedDate, 0).Format(time.RFC3339)
-	}
-
-	// Extract year from Date field (assuming it's a Unix timestamp or year)
-	if album.Date > 0 {
-		if album.Date > 3000 {
-			// Likely a Unix timestamp
-			osAlbum.Year = time.Unix(album.Date, 0).Year()
-		} else {
-			// Likely already a year
-			osAlbum.Year = int(album.Date)
-		}
-	}
-
-	// Set artist information
-	if len(album.AlbumArtists) > 0 {
-		osAlbum.Artist = album.AlbumArtists[0].Name
-		osAlbum.ArtistID = album.AlbumArtists[0].Artisthash
-		osAlbum.Parent = album.AlbumArtists[0].Artisthash
-	}
-
-	// Set genre
-	if len(album.Genres) > 0 {
-		osAlbum.Genre = album.Genres[0].Name
-	}
-
-	return osAlbum
+type GetAlbumListRquest struct {
+	Type          AlbumListType `query:"type" form:"type" validate:"required,oneof=random newest highest frequent recent alphabeticalByName alphabeticalByArtist starred byYear byGenre"`
+	Size          int           `query:"size" form:"size" validate:"omitempty,min=1,max=500"`
+	Offset        int           `query:"offset" form:"offset" validate:"omitempty,min=0"`
+	FromYear      string        `query:"fromYear" form:"fromYear" validate:"required_if=Type byYear"`
+	ToYear        string        `query:"toYear" form:"toYear" validate:"required_if=Type byYear"`
+	Genre         string        `query:"genre" form:"genre" validate:"required_if=Type byGenre"`
+	MusicFolderID string        `query:"musicFolderId" form:"musicFolderId" validate:"omitempty"`
 }
 
 // GetAlbumList Returns a list of random, newest, highest rated etc. albums.
 //
 // https://opensubsonic.netlify.app/docs/endpoints/getalbumlist/
 func (h *AlbumSongListsHandler) GetAlbumList(c echo.Context) error {
-	listType := c.QueryParam("type")
-	if listType == "" {
-		return middleware.RequiredParametrIsMissing
+	var req GetAlbumListRquest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+	if err := c.Validate(&req); err != nil {
+		return err
 	}
 
-	sizeStr := c.QueryParam("size")
-	size := 10 // default
-	if sizeStr != "" {
-		if parsed, err := strconv.Atoi(sizeStr); err == nil && parsed > 0 {
-			if parsed > 500 {
-				size = 500 // max limit
-			} else {
-				size = parsed
-			}
-		}
+	if req.Size == 0 {
+		req.Size = 10
 	}
-
-	offsetStr := c.QueryParam("offset")
-	offset := 0
-	if offsetStr != "" {
-		if parsed, err := strconv.Atoi(offsetStr); err == nil && parsed >= 0 {
-			offset = parsed
-		}
-	}
-
-	client := h.GetAuthedClient(c)
 
 	var albums []osmodels.AlbumID3
 	var err error
 
-	switch listType {
-	case "random":
-		albums, err = h.getRandomAlbums(client, size, offset)
-	case "newest":
-		albums, err = h.getNewestAlbums(client, size, offset)
-	case "highest":
-		albums, err = h.getHighestRatedAlbums(client, size, offset)
-	case "frequent":
-		albums, err = h.getFrequentAlbums(client, size, offset)
-	case "recent":
-		albums, err = h.getRecentAlbums(client, size, offset)
-	case "alphabeticalByName":
-		albums, err = h.getAlphabeticalByName(client, size, offset)
-	case "alphabeticalByArtist":
-		albums, err = h.getAlphabeticalByArtist(client, size, offset)
+	client := h.GetAuthedClient(c)
+
+	switch req.Type {
+	case AlbumListTypeRandom:
+		albums, err = h.getRandomAlbums(&req, client)
+	case AlbumListTypeNewest:
+		albums, err = h.getAlbumsBySorttype(&req, client, "created_date", true)
+	case AlbumListTypeHighest:
+		albums, err = h.getAlbumsBySorttype(&req, client, "playcount", true)
+	case AlbumListTypeFrequent:
+		albums, err = h.getAlbumsBySorttype(&req, client, "playcount", true)
+	case AlbumListTypeRecent:
+		albums, err = h.getAlbumsBySorttype(&req, client, "lastplayed", true)
+	case AlbumListTypeAlphabeticalByName:
+		albums, err = h.getAlbumsBySorttype(&req, client, "title", false)
+	case AlbumListTypeAlphabeticalByArtist:
+		albums, err = h.getAlbumsBySorttype(&req, client, "albumartists", false)
 	case "starred":
-		albums, err = h.getStarredAlbums(client, size, offset)
+		return echo.NewHTTPError(http.StatusNotImplemented, "Starred albums not implemented yet")
 	case "byYear":
-		fromYear := c.QueryParam("fromYear")
-		toYear := c.QueryParam("toYear")
-		if fromYear == "" || toYear == "" {
-			return middleware.RequiredParametrIsMissing
-		}
-		albums, err = h.getAlbumsByYear(client, size, offset, fromYear, toYear)
+		albums, err = h.getAlbumsBySorttype(&req, client, "date", req.FromYear > req.ToYear)
 	case "byGenre":
-		genre := c.QueryParam("genre")
-		if genre == "" {
-			return middleware.RequiredParametrIsMissing
-		}
-		albums, err = h.getAlbumsByGenre(client, size, offset, genre)
+		return echo.NewHTTPError(http.StatusNotImplemented, "Starred albums not implemented yet")
 	default:
-		return echo.NewHTTPError(400, "Invalid list type")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid list type")
 	}
 
 	if err != nil {
 		return err
 	}
-
 	albumList := osmodels.AlbumList{
 		Album: albums,
 	}
-
 	return utils.RenderResponse(c, "albumList", albumList)
 }
 
-func (h *AlbumSongListsHandler) getRandomAlbums(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int) ([]osmodels.AlbumID3, error) {
-	// Get all albums and shuffle
-	allAlbums, err := client.AllAlbums("title", false)
+func mapAlbumShortInfoToAlbum(album *smmodels.AlbumShortInfo, c swingmusic.SwingMusicClientAuthed) (*osmodels.AlbumID3, error) {
+	albumData, err := c.Album(album.AlbumHash, 0)
+	if err != nil {
+		return nil, err
+	}
+	return mapAlbumInfoToAlbum(albumData)
+}
+
+// mapAlbumInfoToAlbum converts a SwingMusic AlbumInfo to OpenSubsonic AlbumID3
+func mapAlbumInfoToAlbum(album *smmodels.AlbumResponse) (*osmodels.AlbumID3, error) {
+	var artistName string
+	for _, artist := range album.Info.AlbumArtists {
+		if artistName != "" {
+			artistName += ", "
+		}
+		artistName += artist.Name
+	}
+	var artistID string
+	if len(album.Info.AlbumArtists) > 0 {
+		artistID = album.Info.AlbumArtists[0].Artisthash
+	}
+
+	var starredTime *time.Time = nil
+	if album.Info.IsFavorite {
+		starredTime = &album.Info.CreatedDate.Time
+	}
+
+	var genre string
+	for _, g := range album.Info.Genres {
+		if genre != "" {
+			genre += ", "
+		}
+		genre += g.Name
+	}
+
+	var recordLables = make([]osmodels.RecordLabel, 0, 1)
+	for _, song := range album.Tracks {
+		for _, label := range song.Extra.Label {
+			exists := false
+			for _, rl := range recordLables {
+				if rl.Name == label {
+					exists = true
+					break
+				}
+			}
+			if !exists {
+				recordLables = append(recordLables, osmodels.RecordLabel{Name: label})
+			}
+		}
+	}
+
+	var genres = make([]osmodels.ItemGenre, 0, len(album.Info.Genres))
+	for _, g := range album.Info.Genres {
+		genres = append(genres, osmodels.ItemGenre{Name: g.Name})
+	}
+
+	var artists = make([]osmodels.ArtistID3, 0, len(album.Info.AlbumArtists))
+	for _, a := range album.Info.AlbumArtists {
+		artists = append(artists, osmodels.ArtistID3{
+			ID:   a.Artisthash,
+			Name: a.Name,
+		})
+	}
+
+	var explicitStatus string
+	hasExplicit := false
+	hasClean := false
+	for _, t := range album.Tracks {
+		if t.Explicit {
+			hasExplicit = true
+		} else {
+			hasClean = true
+		}
+	}
+	if hasExplicit {
+		explicitStatus = "explicit"
+	} else if hasClean {
+		explicitStatus = "clean"
+	} else {
+		explicitStatus = ""
+	}
+
+	var diskTitles = make([]osmodels.DiscTitle, 0)
+	discsMap := make(map[int]string)
+	for _, t := range album.Tracks {
+		if _, exists := discsMap[int(t.Disc)]; !exists {
+			discsMap[int(t.Disc)] = t.Folder
+		}
+	}
+
+	osAlbum := osmodels.AlbumID3{
+		ID:            album.Info.AlbumHash,
+		Name:          album.Info.BaseTitle,
+		Version:       strings.Join(album.Info.Versions, ", "),
+		Artist:        artistName,
+		ArtistID:      artistID,
+		CoverArt:      album.Info.Image,
+		SongCount:     album.Info.TrackCount,
+		Duration:      album.Info.Duration,
+		PlayCount:     album.Info.PlayCount,
+		Created:       album.Info.CreatedDate.Time,
+		Starred:       starredTime,
+		Year:          album.Info.Date.Year(),
+		Genre:         genre,
+		Played:        album.Info.LastPlayed.Time,
+		UserRating:    0, // SwingMusic doesn't have ratings
+		RecordLabels:  recordLables,
+		MusicBrainzID: "", // SwingMusic doesn't have MusicBrainzID
+		Genres:        genres,
+		Artists:       artists,
+		DisplayArtist: artistName,
+		RealeaseTypes: []string{}, // SwingMusic doesn't have release types
+		Moods:         []string{}, // SwingMusic doesn't have moods
+		SortName:      album.Info.BaseTitle,
+		OriginalReleaseDate: osmodels.ItemDate{
+			Year:  album.Info.Date.Year(),
+			Month: int(album.Info.Date.Month()),
+			Day:   album.Info.Date.Day(),
+		},
+		ReleaseDate: osmodels.ItemDate{
+			Year:  album.Info.Date.Year(),
+			Month: int(album.Info.Date.Month()),
+			Day:   album.Info.Date.Day(),
+		},
+		IsCompilation:  false, // SwingMusic doesn't have compilation info
+		ExplicitStatus: explicitStatus,
+		DiskTitles:     diskTitles,
+
+		// OLD FIELDS FOR COMPATIBILITY
+		Title: album.Info.Title,
+		Album: album.Info.Title,
+		IsDir: true,
+	}
+
+	return &osAlbum, nil
+}
+
+func mapAlbums(allAlbums *smmodels.Albums, c swingmusic.SwingMusicClientAuthed) ([]osmodels.AlbumID3, error) {
+	albums := make([]osmodels.AlbumID3, 0, len(allAlbums.Items))
+	for _, album := range allAlbums.Items {
+		fullAlbum, err := mapAlbumShortInfoToAlbum(&album, c)
+		if err != nil {
+			return nil, err
+		}
+		albums = append(albums, *fullAlbum)
+	}
+	return albums, nil
+}
+
+func (h *AlbumSongListsHandler) getAlbumsBySorttype(
+	req *GetAlbumListRquest,
+	c swingmusic.SwingMusicClientAuthed,
+	sortBy string,
+	reverse bool,
+) ([]osmodels.AlbumID3, error) {
+	// Sort by playcount descending
+	allAlbums, err := c.AllAlbums(sortBy, reverse, req.Offset, req.Size)
+	if err != nil {
+		return nil, err
+	}
+	return mapAlbums(allAlbums, c)
+}
+
+func (h *AlbumSongListsHandler) getRandomAlbums(req *GetAlbumListRquest, c swingmusic.SwingMusicClientAuthed) ([]osmodels.AlbumID3, error) {
+	sortTypes := []string{"duration", "created_date", "playcount", "playduration",
+		"lastplayed", "trackcount", "title", "albumartists", "date"}
+	randSortType := sortTypes[rand.Intn(len(sortTypes))]
+
+	allAlbums, err := c.AllAlbums(randSortType, rand.Intn(2) == 1, 0, req.Size)
 	if err != nil {
 		return nil, err
 	}
 
-	// Shuffle the albums
 	rand.Shuffle(len(allAlbums.Items), func(i, j int) {
 		allAlbums.Items[i], allAlbums.Items[j] = allAlbums.Items[j], allAlbums.Items[i]
 	})
 
-	// Apply offset and size
-	start := offset
-	end := offset + size
-	if start >= len(allAlbums.Items) {
-		return []osmodels.AlbumID3{}, nil
-	}
-	if end > len(allAlbums.Items) {
-		end = len(allAlbums.Items)
-	}
-
-	albums := make([]osmodels.AlbumID3, 0, end-start)
-	for i := start; i < end; i++ {
-		album := mapAlbumShortInfoToAlbum(&allAlbums.Items[i])
-		albums = append(albums, album)
-	}
-
-	return albums, nil
-}
-
-func (h *AlbumSongListsHandler) getNewestAlbums(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int) ([]osmodels.AlbumID3, error) {
-	// Sort by created_date descending
-	allAlbums, err := client.AllAlbums("created_date", true)
-	if err != nil {
-		return nil, err
-	}
-
-	return h.paginateAlbums(allAlbums.Items, size, offset), nil
-}
-
-func (h *AlbumSongListsHandler) getHighestRatedAlbums(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int) ([]osmodels.AlbumID3, error) {
-	// SwingMusic doesn't have ratings, so we'll use playcount as a proxy
-	allAlbums, err := client.AllAlbums("playcount", true)
-	if err != nil {
-		return nil, err
-	}
-
-	return h.paginateAlbums(allAlbums.Items, size, offset), nil
-}
-
-func (h *AlbumSongListsHandler) getFrequentAlbums(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int) ([]osmodels.AlbumID3, error) {
-	// Sort by playcount descending
-	allAlbums, err := client.AllAlbums("playcount", true)
-	if err != nil {
-		return nil, err
-	}
-
-	return h.paginateAlbums(allAlbums.Items, size, offset), nil
-}
-
-func (h *AlbumSongListsHandler) getRecentAlbums(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int) ([]osmodels.AlbumID3, error) {
-	// Sort by lastplayed descending
-	allAlbums, err := client.AllAlbums("lastplayed", true)
-	if err != nil {
-		return nil, err
-	}
-
-	return h.paginateAlbums(allAlbums.Items, size, offset), nil
-}
-
-func (h *AlbumSongListsHandler) getAlphabeticalByName(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int) ([]osmodels.AlbumID3, error) {
-	// Sort by title ascending
-	allAlbums, err := client.AllAlbums("title", false)
-	if err != nil {
-		return nil, err
-	}
-
-	return h.paginateAlbums(allAlbums.Items, size, offset), nil
-}
-
-func (h *AlbumSongListsHandler) getAlphabeticalByArtist(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int) ([]osmodels.AlbumID3, error) {
-	// Sort by albumartists ascending
-	allAlbums, err := client.AllAlbums("albumartists", false)
-	if err != nil {
-		return nil, err
-	}
-
-	return h.paginateAlbums(allAlbums.Items, size, offset), nil
-}
-
-func (h *AlbumSongListsHandler) getStarredAlbums(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int) ([]osmodels.AlbumID3, error) {
-	// Get all albums and filter by favorites
-	// Note: SwingMusic uses is_favorite field
-	// allAlbums, err := client.AllAlbums("title", false)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// Filter starred albums - we need to get full album info
-	// This is a limitation as AlbumShortInfo doesn't have is_favorite
-	// We'll return empty for now, or you could fetch each album individually
-	return []osmodels.AlbumID3{}, nil
-}
-
-func (h *AlbumSongListsHandler) getAlbumsByYear(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int, fromYearStr, toYearStr string) ([]osmodels.AlbumID3, error) {
-	fromYear, err := strconv.Atoi(fromYearStr)
-	if err != nil {
-		return nil, err
-	}
-	toYear, err := strconv.Atoi(toYearStr)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get all albums
-	allAlbums, err := client.AllAlbums("date", fromYear > toYear)
-	if err != nil {
-		return nil, err
-	}
-
-	// Filter by year range
-	var filtered []smmodels.AlbumShortInfo
-	for _, album := range allAlbums.Items {
-		year := album.Date
-		if year > 3000 {
-			// Unix timestamp, convert to year
-			year = time.Unix(int64(year), 0).Year()
-		}
-
-		if fromYear <= toYear {
-			// Normal range
-			if year >= fromYear && year <= toYear {
-				filtered = append(filtered, album)
-			}
-		} else {
-			// Reverse range
-			if year <= fromYear && year >= toYear {
-				filtered = append(filtered, album)
-			}
-		}
-	}
-
-	return h.paginateAlbums(filtered, size, offset), nil
-}
-
-func (h *AlbumSongListsHandler) getAlbumsByGenre(client interface {
-	AllAlbums(sortBy string, reverse bool) (*smmodels.Albums, error)
-}, size, offset int, genre string) ([]osmodels.AlbumID3, error) {
-	// Get all albums
-	// allAlbums, err := client.AllAlbums("title", false)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// Filter by genre - note that AlbumShortInfo doesn't have genre info
-	// This is a limitation of the SwingMusic API
-	// You might need to fetch full album info for each album
-	// For now, returning empty
-	return []osmodels.AlbumID3{}, nil
-}
-
-func (h *AlbumSongListsHandler) paginateAlbums(albums []smmodels.AlbumShortInfo, size, offset int) []osmodels.AlbumID3 {
-	start := offset
-	end := offset + size
-	if start >= len(albums) {
-		return []osmodels.AlbumID3{}
-	}
-	if end > len(albums) {
-		end = len(albums)
-	}
-
-	result := make([]osmodels.AlbumID3, 0, end-start)
-	for i := start; i < end; i++ {
-		album := mapAlbumShortInfoToAlbum(&albums[i])
-		result = append(result, album)
-	}
-
-	return result
+	return mapAlbums(allAlbums, c)
 }

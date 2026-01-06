@@ -2,7 +2,6 @@ package browsing
 
 import (
 	"path/filepath"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
@@ -78,10 +77,10 @@ func mapSwingAlbumToAlbumID3WithSongs(
 		Artist:   artistName,
 		ArtistID: artistID,
 
-		Year:  info.Date,
+		Year:  info.Date.Year(),
 		Genre: firstGenreName(info.Genres),
 
-		Created: time.Unix(info.Date, 0),
+		Created: info.Date.Time,
 
 		// OpenSubsonic extensions (supported but empty)
 		// Version:             "",
