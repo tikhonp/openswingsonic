@@ -1,10 +1,13 @@
 package browsing
 
 import (
+	"time"
+
 	"github.com/labstack/echo/v4"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
+	"github.com/tikhonp/openswingsonic/internal/swingmusic"
 	smmodels "github.com/tikhonp/openswingsonic/internal/swingmusic/models"
 )
 
@@ -34,22 +37,33 @@ func firstArtistName(artists []smmodels.Artist) string {
 	return ""
 }
 
+func mapArtistToArtistID3(
+	artist *smmodels.ArtistDetail,
+	c swingmusic.SwingMusicClient,
+) *osmodels.ArtistWithAlbumsID3 {
+	var starred string
+	if artist.IsFavorite {
+		starred = time.Unix(0, 0).Format(time.RFC3339)
+	}
+	return &osmodels.ArtistWithAlbumsID3{
+		ID:             artist.ArtistHash,
+		Name:           artist.Name,
+		CoverArt:       artist.Image,
+		AlbumCount:     artist.AlbumCount,
+		ArtistImageURL: c.GetThumbnailURL(artist.Image),
+		Starred:        starred,
+		MusicBrainzID:  "", // SwingMusic does not have MusicBrainz integration
+		SortName:       artist.Name,
+		Roles:          []string{},
+	}
+}
+
 func mapSwingArtistToArtistWithAlbumsID3(
 	artist *smmodels.ArtistDetail,
 	albums *smmodels.ArtistAlbumsResponse,
-) osmodels.ArtistWithAlbumsID3 {
-
-	out := osmodels.ArtistWithAlbumsID3{
-		ID:         artist.ArtistHash,
-		Name:       artist.Name,
-		CoverArt:   artist.Image,
-		AlbumCount: artist.AlbumCount,
-
-		// OpenSubsonic optional extensions (supported but empty)
-		MusicBrainzID: "",
-		SortName:      "",
-		Roles:         []string{},
-	}
+	c swingmusic.SwingMusicClient,
+) *osmodels.ArtistWithAlbumsID3 {
+	out := mapArtistToArtistID3(artist, c)
 
 	albumList := make([]osmodels.AlbumID3, 0)
 
@@ -94,7 +108,7 @@ func (h *BrowsingHandler) GetArtist(c echo.Context) error {
 		return err
 	}
 
-	artist := mapSwingArtistToArtistWithAlbumsID3(&artistResp.Artist, albumsResp)
+	artist := mapSwingArtistToArtistWithAlbumsID3(&artistResp.Artist, albumsResp, h.GetClient())
 
 	return utils.RenderResponse(c, "artist", artist)
 }

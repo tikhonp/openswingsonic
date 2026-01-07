@@ -75,8 +75,12 @@ func (c *swingMusicClient) GetArtistImageURL(artistHash string, size ImageSize) 
 	return fmt.Sprintf("%s/img/artist/%s/%s.webp", c.baseURL, size, artistHash)
 }
 
+func (c *swingMusicClient) GetThumbnailURL(thumbnailID string) string {
+	return fmt.Sprintf("%s/img/thumbnail/%s", c.baseURL, thumbnailID)
+}
+
 func (c *swingMusicClient) GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error) {
-	url := fmt.Sprintf("%s/img/thumbnail/%s", c.baseURL, thumbnailID)
+	url := c.GetThumbnailURL(thumbnailID)
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", nil, err
@@ -427,4 +431,15 @@ func (c *swingMusicClientAuthed) Stream(trackhash, filepath, rangeHeader string)
 		headers.ContentLength = int(resp.ContentLength)
 	}
 	return headers, resp.Body, nil
+}
+
+func (c *swingMusicClientAuthed) Playlists() (*models.Playlists, error) {
+	url := c.baseURL + "/playlists"
+	return doRequest[models.Playlists](c, http.MethodGet, url, nil)
+}
+
+func (c *swingMusicClientAuthed) TriggerScan() error {
+	url := c.baseURL + "/notsettings/trigger-scan"
+	_, err := doRequest[any](c, http.MethodGet, url, nil)
+	return err
 }

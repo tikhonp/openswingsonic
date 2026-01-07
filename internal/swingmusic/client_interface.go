@@ -29,6 +29,9 @@ type SwingMusicClient interface {
 	// GetArtistImageURL returns the URL for the artist image of the specified size.
 	GetArtistImageURL(artistHash string, size ImageSize) string
 
+	// GetThumbnailURL returns the URL for the thumbnail image with the given ID.
+	GetThumbnailURL(thumbnailID string) string
+
 	// GetThumbnailByID returns the URL for the thumbnail image with the given ID.
 	// returns content type, image reader and error if any.
 	GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error)
@@ -128,4 +131,10 @@ type SwingMusicClientAuthed interface {
 	// Stream streams the media file located at the given filepath and with assosiated trackhash.
 	// rangeHeader arg is the value of the "Range" HTTP header for partial content requests.
 	Stream(trackhash, filepath, rangeHeader string) (*models.StreamedFileHeaders, io.ReadCloser, error)
+
+	// Playlists returns all playlists for the authenticated user.
+	Playlists() (*models.Playlists, error)
+
+	// TriggerScan triggers a media library scan on the server.
+	TriggerScan() error
 }

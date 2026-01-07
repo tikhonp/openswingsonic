@@ -3,17 +3,42 @@ package browsing
 import (
 	"sort"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/labstack/echo/v4"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
+	"github.com/tikhonp/openswingsonic/internal/swingmusic"
 	smmodels "github.com/tikhonp/openswingsonic/internal/swingmusic/models"
 )
 
 const ignoredArticles = "The An A Die Das Ein Eine Les Le La"
 
-func mapArtistsToArtistsID3(in *smmodels.Artists) osmodels.ArtistsID3 {
+func fetchArtistAlbumsCount(artistID string, c swingmusic.SwingMusicClientAuthed, cb swingmusic.SwingMusicClient) (*osmodels.ArtistID3, error) {
+	artistDetail, err := c.Artist(artistID)
+	if err != nil {
+		return nil, err
+	}
+	artist := artistDetail.Artist
+	var starred string
+	if artist.IsFavorite {
+		starred = time.Unix(0, 0).Format(time.RFC3339)
+	}
+	return &osmodels.ArtistID3{
+		ID:             artist.ArtistHash,
+		Name:           artist.Name,
+		CoverArt:       artist.Image,
+		AlbumCount:     artist.AlbumCount,
+		ArtistImageURL: cb.GetThumbnailURL(artist.Image),
+		Starred:        starred,
+		MusicBrainzID:  "", // SwingMusic does not have MusicBrainz integration
+		SortName:       artist.Name,
+		Roles:          []string{},
+	}, nil
+}
+
+func mapArtistsToArtistsID3(in *smmodels.Artists, c swingmusic.SwingMusicClientAuthed, cb swingmusic.SwingMusicClient) (*osmodels.ArtistsID3, error) {
 	grouped := make(map[string][]osmodels.ArtistID3)
 
 	for _, a := range in.Items {
@@ -26,11 +51,12 @@ func mapArtistsToArtistsID3(in *smmodels.Artists) osmodels.ArtistsID3 {
 			first = "#"
 		}
 
-		grouped[first] = append(grouped[first], osmodels.ArtistID3{
-			ID:         a.Artisthash,
-			Name:       a.Name,
-			AlbumCount: 0,
-		})
+		artist, err := fetchArtistAlbumsCount(a.Artisthash, c, cb)
+		if err != nil {
+			return nil, err
+		}
+
+		grouped[first] = append(grouped[first], *artist)
 	}
 
 	indexes := make([]osmodels.IndexID3, 0, len(grouped))
@@ -50,10 +76,10 @@ func mapArtistsToArtistsID3(in *smmodels.Artists) osmodels.ArtistsID3 {
 		return indexes[i].Name < indexes[j].Name
 	})
 
-	return osmodels.ArtistsID3{
+	return &osmodels.ArtistsID3{
 		IgnoredArticles: ignoredArticles,
 		Index:           indexes,
-	}
+	}, nil
 }
 
 // GetArtists Returns all artists organized according to ID3 tags.
@@ -65,6 +91,9 @@ func (h *BrowsingHandler) GetArtists(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	data := mapArtistsToArtistsID3(artists)
+	data, err := mapArtistsToArtistsID3(artists, h.GetAuthedClient(c), h.GetClient())
+	if err != nil {
+		return err
+	}
 	return utils.RenderResponse(c, "artists", data)
 }
