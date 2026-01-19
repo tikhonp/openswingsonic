@@ -31,10 +31,6 @@ type SwingMusicClient interface {
 
 	// GetThumbnailURL returns the URL for the thumbnail image with the given ID.
 	GetThumbnailURL(thumbnailID string) string
-
-	// GetThumbnailByID returns the URL for the thumbnail image with the given ID.
-	// returns content type, image reader and error if any.
-	GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error)
 }
 
 // SwingMusicClientAuthed defines the interface for an authenticated Swing Music client.
@@ -137,4 +133,8 @@ type SwingMusicClientAuthed interface {
 
 	// TriggerScan triggers a media library scan on the server.
 	TriggerScan() error
+
+	// GetThumbnailByID returns the URL for the thumbnail image with the given ID.
+	// returns content type, image reader and error if any.
+	GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error)
 }

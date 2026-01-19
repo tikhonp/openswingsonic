@@ -42,12 +42,28 @@ type GetAlbumListRquest struct {
 //
 // https://opensubsonic.netlify.app/docs/endpoints/getalbumlist/
 func (h *AlbumSongListsHandler) GetAlbumList(c echo.Context) error {
-	var req GetAlbumListRquest
-	if err := c.Bind(&req); err != nil {
+	albumList, err := h.FetchAlbumList(c)
+	if err != nil {
 		return err
 	}
-	if err := c.Validate(&req); err != nil {
+	return utils.RenderResponse(c, "albumList", albumList)
+}
+
+func (h *AlbumSongListsHandler) GetAlbumList2(c echo.Context) error {
+	albumList, err := h.FetchAlbumList(c)
+	if err != nil {
 		return err
+	}
+	return utils.RenderResponse(c, "albumList2", albumList)
+}
+
+func (h *AlbumSongListsHandler) FetchAlbumList(c echo.Context) (*osmodels.AlbumList, error) {
+	var req GetAlbumListRquest
+	if err := c.Bind(&req); err != nil {
+		return nil, err
+	}
+	if err := c.Validate(&req); err != nil {
+		return nil, err
 	}
 
 	if req.Size == 0 {
@@ -75,22 +91,19 @@ func (h *AlbumSongListsHandler) GetAlbumList(c echo.Context) error {
 	case AlbumListTypeAlphabeticalByArtist:
 		albums, err = h.getAlbumsBySorttype(&req, client, "albumartists", false)
 	case "starred":
-		return echo.NewHTTPError(http.StatusNotImplemented, "Starred albums not implemented yet")
+		return nil, echo.NewHTTPError(http.StatusNotImplemented, "Starred albums not implemented yet")
 	case "byYear":
 		albums, err = h.getAlbumsBySorttype(&req, client, "date", req.FromYear > req.ToYear)
 	case "byGenre":
-		return echo.NewHTTPError(http.StatusNotImplemented, "Starred albums not implemented yet")
+		return nil, echo.NewHTTPError(http.StatusNotImplemented, "Starred albums not implemented yet")
 	default:
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid list type")
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Invalid list type")
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
-	albumList := osmodels.AlbumList{
-		Album: albums,
-	}
-	return utils.RenderResponse(c, "albumList", albumList)
+	return &osmodels.AlbumList{Album: albums}, nil
 }
 
 func mapAlbumShortInfoToAlbum(album *smmodels.AlbumShortInfo, c swingmusic.SwingMusicClientAuthed) (*osmodels.AlbumID3, error) {

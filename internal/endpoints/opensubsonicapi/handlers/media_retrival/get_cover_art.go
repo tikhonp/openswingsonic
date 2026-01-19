@@ -12,7 +12,7 @@ func (h *MediaRetrivalHandler) GetCoverArt(c echo.Context) error {
 	if id == "" {
 		return middleware.RequiredParametrIsMissing
 	}
-	contentType, imgReader, err := h.GetClient().GetThumbnailByID(id)
+	contentType, imgReader, err := h.GetAuthedClient(c).GetThumbnailByID(id)
 	if err != nil {
 		return err
 	}

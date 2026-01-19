@@ -56,7 +56,7 @@ func ConfigureOpenSubsonicRoutes(
 	// Album/song lists	getRandomSongs getSongsByGenre getNowPlaying getStarred getStarred2
 	albumSongListsHandler := albumsonglists.AlbumSongListsHandler{Handler: handler}
 	protected.GET("/getAlbumList.view", albumSongListsHandler.GetAlbumList)
-	protected.GET("/getAlbumList2.view", albumSongListsHandler.GetAlbumList)
+	protected.GET("/getAlbumList2.view", albumSongListsHandler.GetAlbumList2)
 
 	// Searching	search search2 search3
 

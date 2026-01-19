@@ -79,18 +79,6 @@ func (c *swingMusicClient) GetThumbnailURL(thumbnailID string) string {
 	return fmt.Sprintf("%s/img/thumbnail/%s", c.baseURL, thumbnailID)
 }
 
-func (c *swingMusicClient) GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error) {
-	url := c.GetThumbnailURL(thumbnailID)
-	resp, err := http.Get(url)
-	if err != nil {
-		return "", nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", nil, fmt.Errorf("failed to get thumbnail, status: %s", resp.Status)
-	}
-	return resp.Header.Get("Content-Type"), resp.Body, nil
-}
-
 // swingMusicClientAuthed implements the SwingMusicClientAuthed interface.
 type swingMusicClientAuthed struct {
 	*swingMusicClient
@@ -442,4 +430,22 @@ func (c *swingMusicClientAuthed) TriggerScan() error {
 	url := c.baseURL + "/notsettings/trigger-scan"
 	_, err := doRequest[any](c, http.MethodGet, url, nil)
 	return err
+}
+
+func (c *swingMusicClientAuthed) GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error) {
+	url := c.GetThumbnailURL(thumbnailID)
+
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", nil, err
+	}
+	request.AddCookie(c.authCookie)
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return "", nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return "", nil, fmt.Errorf("failed to get thumbnail, status: %s", resp.Status)
+	}
+	return resp.Header.Get("Content-Type"), resp.Body, nil
 }
