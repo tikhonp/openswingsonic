@@ -3,6 +3,8 @@ ARG ALPINE_VERSION=3.23
 
 
 FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS dev
+# mime type support
+RUN apk update && apk add mailcap && rm -rf /var/cache/apk/*
 VOLUME /storage
 ENV LISTEN_ADDR=":1991"
 ENV DATABASE_PATH="/storage/openswingmusic.db"
@@ -28,6 +30,9 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 
 
 FROM alpine:${ALPINE_VERSION} AS prod
+
+# mime type support
+RUN apk update && apk add mailcap && rm -rf /var/cache/apk/*
 
 ARG VERSION
 ARG BUILD_DATE

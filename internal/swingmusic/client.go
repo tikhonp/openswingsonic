@@ -449,3 +449,8 @@ func (c *swingMusicClientAuthed) GetThumbnailByID(thumbnailID string) (string, i
 	}
 	return resp.Header.Get("Content-Type"), resp.Body, nil
 }
+
+func (c *swingMusicClientAuthed) Favorites() (*models.Starred, error) {
+	url := c.baseURL + "/favorites"
+	return doRequest[models.Starred](c, http.MethodGet, url, nil)
+}

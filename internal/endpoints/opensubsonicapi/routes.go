@@ -29,7 +29,7 @@ func ConfigureOpenSubsonicRoutes(
 
 	handler := handlers.NewHandler(sm)
 
-	// System
+	// System:
 	systemHandler := system.SystemHandler{Handler: handler}
 	protected.GET("/ping.view", systemHandler.Ping)
 	protected.GET("/getLicense.view", systemHandler.GetLicense)
@@ -37,7 +37,7 @@ func ConfigureOpenSubsonicRoutes(
 	g.GET("/getOpenSubsonicExtensions.view", systemHandler.GetOpenSubsonicExtensions)
 	protected.GET("/tokenInfo.view", systemHandler.TokenInfo)
 
-	// Browsing	getVideos getVideoInfo getSimilarSongs getSimilarSongs2
+	// Browsing: getVideos getVideoInfo getSimilarSongs getSimilarSongs2
 	browsingHandler := browsing.BrowsingHandler{Handler: handler}
 	protected.GET("/getMusicFolders.view", browsingHandler.GetMusicFolders)
 	protected.GET("/getIndexes.view", browsingHandler.GetIndexes)
@@ -53,24 +53,25 @@ func ConfigureOpenSubsonicRoutes(
 	protected.GET("/getAlbumInfo2.view", browsingHandler.GetAlbumInfo)
 	protected.GET("/getTopSongs.view", browsingHandler.GetTopSongs)
 
-	// Album/song lists	getRandomSongs getSongsByGenre getNowPlaying getStarred getStarred2
+	// Album/song lists: getRandomSongs getSongsByGenre getNowPlaying getStarred getStarred2
 	albumSongListsHandler := albumsonglists.AlbumSongListsHandler{Handler: handler}
 	protected.GET("/getAlbumList.view", albumSongListsHandler.GetAlbumList)
 	protected.GET("/getAlbumList2.view", albumSongListsHandler.GetAlbumList2)
+	protected.GET("/getStarred.view", albumSongListsHandler.GetStarred)
 
-	// Searching	search search2 search3
+	// Searching: search search2 search3
 
-	// Playlists	getPlaylist createPlaylist updatePlaylist deletePlaylist
+	// Playlists: getPlaylist createPlaylist updatePlaylist deletePlaylist
 	playlistsHandler := playlists.PlaylistsHandler{Handler: handler}
 	protected.GET("/getPlaylists.view", playlistsHandler.GetPlaylists)
 
-	// Media retrieval hls getCaptions getLyrics getAvatar getLyricsBySongId
+	// Media retrieval: hls getCaptions getLyrics getAvatar getLyricsBySongId
 	mediaRetrivalHandler := mediaretrival.MediaRetrivalHandler{Handler: handler}
 	protected.GET("/getCoverArt.view", mediaRetrivalHandler.GetCoverArt)
 	protected.GET("/stream.view", mediaRetrivalHandler.Stream)
 	protected.GET("/download.view", mediaRetrivalHandler.Stream)
 
-	// Media annotation	star unstar setRating scrobble
+	// Media annotation: star unstar setRating scrobble
 
 	// Sharing	getShares createShare updateShare deleteShare
 

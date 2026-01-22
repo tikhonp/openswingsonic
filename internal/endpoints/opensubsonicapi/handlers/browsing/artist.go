@@ -26,7 +26,7 @@ func mapAlbumShortToAlbumID3(
 		CoverArt: album.Image,
 		ArtistID: artistID,
 		Artist:   artist,
-		Year:     album.Date,
+		Year:     album.Date.Year(),
 	}
 }
 

@@ -23,3 +23,22 @@ type StreamedFileHeaders struct {
 	ContentDisposition string
 	ContentRange       string
 }
+
+type Starred struct {
+	Albums  []AlbumShortInfo `json:"albums"`
+	Artists []ArtistItem     `json:"artists"`
+	Count   StarredCount     `json:"count"`
+	Recents []StarredRecent  `json:"recents"`
+	Tracks  []Track          `json:"tracks"`
+}
+
+type StarredRecent struct {
+	// Item Item   `json:"item"`
+	Type string `json:"type"`
+}
+
+type StarredCount struct {
+	Albums  int64 `json:"albums"`
+	Artists int64 `json:"artists"`
+	Tracks  int64 `json:"tracks"`
+}

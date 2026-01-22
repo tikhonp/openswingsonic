@@ -52,16 +52,16 @@ type Genre struct {
 }
 
 type AlbumShortInfo struct {
-	Score        float64  `json:"_score"`
-	AlbumArtists []Artist `json:"albumartists"`
-	AlbumHash    string   `json:"albumhash"`
-	Color        string   `json:"color"`
-	Date         int      `json:"date"`
-	Image        string   `json:"image"`
-	PathHash     string   `json:"pathhash"`
-	Title        string   `json:"title"`
-	Type         string   `json:"type"`
-	Versions     []any    `json:"versions"`
+	Score        float64        `json:"_score"`
+	AlbumArtists []Artist       `json:"albumartists"`
+	AlbumHash    string         `json:"albumhash"`
+	Color        string         `json:"color"`
+	Date         util.Timestamp `json:"date"`
+	Image        string         `json:"image"`
+	PathHash     string         `json:"pathhash"`
+	Title        string         `json:"title"`
+	Type         string         `json:"type"`
+	Versions     []any          `json:"versions"`
 }
 
 type AlbumStat struct {

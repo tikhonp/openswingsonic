@@ -128,6 +128,9 @@ type SwingMusicClientAuthed interface {
 	// rangeHeader arg is the value of the "Range" HTTP header for partial content requests.
 	Stream(trackhash, filepath, rangeHeader string) (*models.StreamedFileHeaders, io.ReadCloser, error)
 
+	// Favorites returns all starred/favorite albums, artists, tracks and recents for the authenticated user.
+	Favorites() (*models.Starred, error)
+
 	// Playlists returns all playlists for the authenticated user.
 	Playlists() (*models.Playlists, error)
 

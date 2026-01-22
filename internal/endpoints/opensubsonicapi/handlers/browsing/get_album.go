@@ -1,7 +1,10 @@
 package browsing
 
 import (
+	"mime"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
@@ -11,6 +14,8 @@ import (
 )
 
 func mapTrackToChild(t *smmodels.Track) osmodels.Song {
+	fileExtenstion := filepath.Ext(t.Filepath)
+
 	return osmodels.Song{
 		ID:           t.Trackhash,
 		Parent:       t.Albumhash,
@@ -33,16 +38,16 @@ func mapTrackToChild(t *smmodels.Track) osmodels.Song {
 		Genres:       mapSwingGenreToGenre(t.Extra.Genre),
 		Size:         t.Extra.Filesize,
 		DiscNumber:   t.Disc,
-		Suffix:       filepath.Ext(t.Filepath)[1:],
-		ContentType:  "", // optional
+		Suffix:       fileExtenstion[1:],
+		ContentType:  mime.TypeByExtension(fileExtenstion),
 		Path:         t.Filepath,
 	}
 }
 
-func mapSwingGenreToGenre(in []string) []osmodels.Genre {
-	out := make([]osmodels.Genre, 0, len(in))
+func mapSwingGenreToGenre(in []string) []osmodels.ItemGenre {
+	out := make([]osmodels.ItemGenre, 0, len(in))
 	for _, g := range in {
-		out = append(out, osmodels.Genre{Name: g})
+		out = append(out, osmodels.ItemGenre{Name: g})
 	}
 	return out
 }
@@ -53,52 +58,127 @@ func mapSwingAlbumToAlbumID3WithSongs(
 
 	info := resp.Info
 
-	artistName := ""
-	artistID := ""
+	var artistName string
+	for _, artist := range info.AlbumArtists {
+		if artistName != "" {
+			artistName += ", "
+		}
+		artistName += artist.Name
+	}
+	var artistID string
 	if len(info.AlbumArtists) > 0 {
-		artistName = info.AlbumArtists[0].Name
 		artistID = info.AlbumArtists[0].Artisthash
 	}
 
+	var starredTime *time.Time = nil
+	if info.IsFavorite {
+		starredTime = &info.CreatedDate.Time
+	}
+
+	var genre string
+	for _, g := range info.Genres {
+		if genre != "" {
+			genre += ", "
+		}
+		genre += g.Name
+	}
+
+	var recordLables = make([]osmodels.RecordLabel, 0, 1)
+	for _, song := range resp.Tracks {
+		for _, label := range song.Extra.Label {
+			exists := false
+			for _, rl := range recordLables {
+				if rl.Name == label {
+					exists = true
+					break
+				}
+			}
+			if !exists {
+				recordLables = append(recordLables, osmodels.RecordLabel{Name: label})
+			}
+		}
+	}
+
+	var genres = make([]osmodels.ItemGenre, 0, len(info.Genres))
+	for _, g := range info.Genres {
+		genres = append(genres, osmodels.ItemGenre{Name: g.Name})
+	}
+
+	var artists = make([]osmodels.ArtistID3, 0, len(info.AlbumArtists))
+	for _, a := range info.AlbumArtists {
+		artists = append(artists, osmodels.ArtistID3{
+			ID:   a.Artisthash,
+			Name: a.Name,
+		})
+	}
+
+	var explicitStatus string
+	hasExplicit := false
+	hasClean := false
+	for _, t := range resp.Tracks {
+		if t.Explicit {
+			hasExplicit = true
+		} else {
+			hasClean = true
+		}
+	}
+	if hasExplicit {
+		explicitStatus = "explicit"
+	} else if hasClean {
+		explicitStatus = "clean"
+	} else {
+		explicitStatus = ""
+	}
+
+	var diskTitles = make([]osmodels.DiscTitle, 0)
+	discsMap := make(map[int]string)
+	for _, t := range resp.Tracks {
+		if _, exists := discsMap[int(t.Disc)]; !exists {
+			discsMap[int(t.Disc)] = t.Folder
+		}
+	}
+
 	out := osmodels.AlbumID3WithSongs{
-
-		ID:       info.AlbumHash,
-		Parent:   info.PathHash,
-		Album:    info.Title,
-		Title:    info.Title,
-		Name:     info.Title,
-		IsDir:    true,
-		CoverArt: info.Image,
-
-		SongCount: info.TrackCount,
-		Duration:  info.Duration,
-		PlayCount: info.PlayCount,
-
-		Artist:   artistName,
-		ArtistID: artistID,
-
-		Year:  info.Date.Year(),
-		Genre: firstGenreName(info.Genres),
-
-		Created: info.Date.Time,
-
-		// OpenSubsonic extensions (supported but empty)
-		// Version:             "",
-		// Played:              "",
-		// UserRating:          0,
-		// MusicBrainzID:       "",
+		ID:            info.AlbumHash,
+		Name:          info.BaseTitle,
+		Version:       strings.Join(info.Versions, ", "),
+		Artist:        artistName,
+		ArtistID:      artistID,
+		CoverArt:      info.Image,
+		SongCount:     info.TrackCount,
+		Duration:      info.Duration,
+		PlayCount:     info.PlayCount,
+		Created:       info.CreatedDate.Time,
+		Starred:       starredTime,
+		Year:          info.Date.Year(),
+		Genre:         genre,
+		Played:        info.LastPlayed.Time,
+		UserRating:    0, // SwingMusic doesn't have ratings
+		RecordLabels:  recordLables,
+		MusicBrainzID: "", // SwingMusic doesn't have MusicBrainzID
+		Genres:        genres,
+		Artists:       artists,
 		DisplayArtist: artistName,
-		ReleaseTypes:  []string{},
-		Moods:         []string{},
-		// SortName:            "",
-		IsCompilation:  false,
-		ExplicitStatus: albumExplicitStatus(resp.Tracks),
-		DiscTitles:     []osmodels.DiscTitle{},
-		// RecordLabels:        []osmodels.RecordLabel{},
-		Artists: mapAlbumArtists(info.AlbumArtists),
-		Genres:  mapGenres(info.Genres),
-		// OriginalReleaseDate: nil,
-		// ReleaseDate:         nil,
+		Moods:         []string{}, // SwingMusic doesn't have moods
+		SortName:      info.BaseTitle,
+		OriginalReleaseDate: osmodels.ItemDate{
+			Year:  info.Date.Year(),
+			Month: int(info.Date.Month()),
+			Day:   info.Date.Day(),
+		},
+		ReleaseDate: osmodels.ItemDate{
+			Year:  info.Date.Year(),
+			Month: int(info.Date.Month()),
+			Day:   info.Date.Day(),
+		},
+		IsCompilation:  false, // SwingMusic doesn't have compilation info
+		ExplicitStatus: explicitStatus,
+		DiscTitles:     diskTitles,
+
+		// OLD FIELDS FOR COMPATIBILITY
+		Title: info.Title,
+		Album: info.Title,
+		IsDir: true,
 	}
 
 	songs := make([]osmodels.Song, 0, len(resp.Tracks))
@@ -117,25 +197,6 @@ func firstGenreName(genres []smmodels.Genre) string {
 		return genres[0].Name
 	}
 	return ""
-}
-
-func mapGenres(genres []smmodels.Genre) []osmodels.Genre {
-	out := make([]osmodels.Genre, 0, len(genres))
-	for _, g := range genres {
-		out = append(out, osmodels.Genre{Name: g.Name})
-	}
-	return out
-}
-
-func mapAlbumArtists(in []smmodels.Artist) []osmodels.ArtistFromAlbum {
-	out := make([]osmodels.ArtistFromAlbum, 0, len(in))
-	for _, a := range in {
-		out = append(out, osmodels.ArtistFromAlbum{
-			ID:   a.Artisthash,
-			Name: a.Name,
-		})
-	}
-	return out
 }
 
 func albumExplicitStatus(tracks []smmodels.Track) string {
