@@ -454,3 +454,24 @@ func (c *swingMusicClientAuthed) Favorites() (*models.Starred, error) {
 	url := c.baseURL + "/favorites"
 	return doRequest[models.Starred](c, http.MethodGet, url, nil)
 }
+
+func (c *swingMusicClientAuthed) updateFavorite(action, itemType, hash string) error {
+	url := fmt.Sprintf("%s/favorites/%s", c.baseURL, action)
+	reqBody := models.FavoriteRequest{Type: itemType, Hash: hash}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return err
+	}
+
+	_, err = doRequest[any](c, http.MethodPost, url, bytes.NewBuffer(jsonData))
+	return err
+}
+
+func (c *swingMusicClientAuthed) AddFavorite(itemType, hash string) error {
+	return c.updateFavorite("add", itemType, hash)
+}
+
+func (c *swingMusicClientAuthed) RemoveFavorite(itemType, hash string) error {
+	return c.updateFavorite("remove", itemType, hash)
+}

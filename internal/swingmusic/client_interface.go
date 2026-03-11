@@ -131,6 +131,14 @@ type SwingMusicClientAuthed interface {
 	// Favorites returns all starred/favorite albums, artists, tracks and recents for the authenticated user.
 	Favorites() (*models.Starred, error)
 
+	// AddFavorite adds the given item to the user's favorites.
+	// itemType must be one of "track", "album", or "artist".
+	AddFavorite(itemType, hash string) error
+
+	// RemoveFavorite removes the given item from the user's favorites.
+	// itemType must be one of "track", "album", or "artist".
+	RemoveFavorite(itemType, hash string) error
+
 	// Playlists returns all playlists for the authenticated user.
 	Playlists() (*models.Playlists, error)
 

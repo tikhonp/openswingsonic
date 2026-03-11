@@ -22,9 +22,6 @@ func ConfigureOpenSubsonicRoutes(
 	osauth opensubsonicauth.OpenSubsonicAuth,
 	sm swingmusic.SwingMusicClient,
 ) {
-	// This function would typically set up the routes for the OpenSubsonic API.
-	// Implementation details would depend on the specific web framework being used.
-
 	g.Use(middleware.ErrorHandler)
 
 	protected := g.Group("", opensubsonicauth.Middleware(osauth))
@@ -61,7 +58,7 @@ func ConfigureOpenSubsonicRoutes(
 	protected.GET("/getAlbumList2.view", albumSongListsHandler.GetAlbumList2)
 	protected.GET("/getStarred.view", albumSongListsHandler.GetStarred)
 
-	// Searching: search search2 search3
+	// Searching:
 	searchHandler := search.SearchHandler{Handler: handler}
 	protected.GET("/search.view", searchHandler.Search)
 	protected.GET("/search2.view", searchHandler.Search2)
@@ -77,8 +74,10 @@ func ConfigureOpenSubsonicRoutes(
 	protected.GET("/stream.view", mediaRetrivalHandler.Stream)
 	protected.GET("/download.view", mediaRetrivalHandler.Stream)
 
-	// Media annotation: star unstar setRating scrobble
+	// Media annotation: setRating
 	mediaAnnotationHandler := mediaannotation.MediaAnnotationHandler{Handler: handler}
+	protected.GET("/star.view", mediaAnnotationHandler.Star)
+	protected.GET("/unstar.view", mediaAnnotationHandler.Unstar)
 	protected.GET("/scrobble.view", mediaAnnotationHandler.Scrobble)
 
 	// Sharing	getShares createShare updateShare deleteShare
