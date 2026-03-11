@@ -2,3 +2,4 @@ users
 compose.yaml
 storage/
 test/
+tmp/

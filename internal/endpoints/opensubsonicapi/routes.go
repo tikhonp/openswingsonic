@@ -6,6 +6,7 @@ import (
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers"
 	albumsonglists "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/album_song_lists"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/browsing"
+	mediaannotation "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/media_annotation"
 	medialibraryscanning "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/media_library_scanning"
 	mediaretrival "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/media_retrival"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/playlists"
@@ -72,6 +73,8 @@ func ConfigureOpenSubsonicRoutes(
 	protected.GET("/download.view", mediaRetrivalHandler.Stream)
 
 	// Media annotation: star unstar setRating scrobble
+	mediaAnnotationHandler := mediaannotation.MediaAnnotationHandler{Handler: handler}
+	protected.GET("/scrobble.view", mediaAnnotationHandler.Scrobble)
 
 	// Sharing	getShares createShare updateShare deleteShare
 
