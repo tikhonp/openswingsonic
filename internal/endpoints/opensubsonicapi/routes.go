@@ -10,6 +10,7 @@ import (
 	medialibraryscanning "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/media_library_scanning"
 	mediaretrival "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/media_retrival"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/playlists"
+	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/search"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/system"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
 	opensubsonicauth "github.com/tikhonp/openswingsonic/internal/middleware/opensubsonic_auth"
@@ -61,6 +62,10 @@ func ConfigureOpenSubsonicRoutes(
 	protected.GET("/getStarred.view", albumSongListsHandler.GetStarred)
 
 	// Searching: search search2 search3
+	searchHandler := search.SearchHandler{Handler: handler}
+	protected.GET("/search.view", searchHandler.Search)
+	protected.GET("/search2.view", searchHandler.Search2)
+	protected.GET("/search3.view", searchHandler.Search3)
 
 	// Playlists: getPlaylist createPlaylist updatePlaylist deletePlaylist
 	playlistsHandler := playlists.PlaylistsHandler{Handler: handler}

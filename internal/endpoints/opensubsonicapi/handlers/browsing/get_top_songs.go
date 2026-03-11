@@ -52,14 +52,11 @@ func (h *BrowsingHandler) GetTopSongs(c echo.Context) error {
 			}
 
 			// Convert tracks to songs and limit by count
-			maxTracks := count
-			if len(*tracks) < maxTracks {
-				maxTracks = len(*tracks)
-			}
+			maxTracks := min(len(*tracks), count)
 
-			for i := 0; i < maxTracks; i++ {
+			for i := range maxTracks {
 				track := (*tracks)[i]
-				song := mapTrackToChild(&track)
+				song := MapTrackToChild(&track)
 				songs = append(songs, song)
 			}
 		}

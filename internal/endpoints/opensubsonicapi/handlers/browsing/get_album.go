@@ -13,7 +13,7 @@ import (
 	smmodels "github.com/tikhonp/openswingsonic/internal/swingmusic/models"
 )
 
-func mapTrackToChild(t *smmodels.Track) osmodels.Song {
+func MapTrackToChild(t *smmodels.Track) osmodels.Song {
 	fileExtenstion := filepath.Ext(t.Filepath)
 
 	return osmodels.Song{
@@ -184,40 +184,12 @@ func mapSwingAlbumToAlbumID3WithSongs(
 	songs := make([]osmodels.Song, 0, len(resp.Tracks))
 	for _, t := range resp.Tracks {
 		songs = append(songs,
-			mapTrackToChild(&t),
+			MapTrackToChild(&t),
 		)
 	}
 	out.Song = songs
 
 	return out
-}
-
-func firstGenreName(genres []smmodels.Genre) string {
-	if len(genres) > 0 {
-		return genres[0].Name
-	}
-	return ""
-}
-
-func albumExplicitStatus(tracks []smmodels.Track) string {
-	hasExplicit := false
-	hasClean := false
-
-	for _, t := range tracks {
-		if t.Explicit {
-			hasExplicit = true
-		} else {
-			hasClean = true
-		}
-	}
-
-	if hasExplicit {
-		return "explicit"
-	}
-	if hasClean {
-		return "clean"
-	}
-	return ""
 }
 
 // https://opensubsonic.netlify.app/docs/endpoints/getalbum/

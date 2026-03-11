@@ -26,6 +26,6 @@ func (h *BrowsingHandler) GetSong(c echo.Context) error {
 
 	songResult := result.Results[0]
 
-	song := mapTrackToChild(&songResult)
+	song := MapTrackToChild(&songResult)
 	return utils.RenderResponse(c, "song", song)
 }
