@@ -1,7 +1,6 @@
 package swingmusic
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/tikhonp/openswingsonic/internal/swingmusic/models"
@@ -126,7 +125,7 @@ type SwingMusicClientAuthed interface {
 
 	// Stream streams the media file located at the given filepath and with assosiated trackhash.
 	// rangeHeader arg is the value of the "Range" HTTP header for partial content requests.
-	Stream(trackhash, filepath, rangeHeader string) (*models.StreamedFileHeaders, io.ReadCloser, error)
+	Stream(trackhash, filepath, rangeHeader string) (*models.StreamedFileHeaders, []byte, error)
 
 	// Favorites returns all starred/favorite albums, artists, tracks and recents for the authenticated user.
 	Favorites() (*models.Starred, error)
@@ -146,6 +145,6 @@ type SwingMusicClientAuthed interface {
 	TriggerScan() error
 
 	// GetThumbnailByID returns the URL for the thumbnail image with the given ID.
-	// returns content type, image reader and error if any.
-	GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error)
+	// returns content type, image and error if any.
+	GetThumbnailByID(thumbnailID string) (string, []byte, error)
 }

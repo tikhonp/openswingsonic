@@ -17,9 +17,9 @@ func (h *MediaRetrivalHandler) GetCoverArt(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	contentType, imgReader, err := client.GetThumbnailByID(album.Info.Image)
+	contentType, data, err := client.GetThumbnailByID(album.Info.Image)
 	if err != nil {
 		return err
 	}
-	return c.Stream(http.StatusOK, contentType, imgReader)
+	return c.Blob(http.StatusOK, contentType, data)
 }
