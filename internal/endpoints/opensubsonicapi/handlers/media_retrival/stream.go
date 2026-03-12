@@ -23,7 +23,7 @@ func (h *MediaRetrivalHandler) Stream(c echo.Context) error {
 	}
 	track := result.Results[0]
 
-	headers, data, err := h.GetAuthedClient(c).Stream(
+	headers, reader, err := h.GetAuthedClient(c).Stream(
 		track.Trackhash,
 		track.Folder,
 		c.Request().Header.Get("Range"),
@@ -41,5 +41,5 @@ func (h *MediaRetrivalHandler) Stream(c echo.Context) error {
 	if headers.ContentDisposition != "" {
 		c.Response().Header().Set("Content-Disposition", headers.ContentDisposition)
 	}
-	return c.Blob(http.StatusOK, headers.ContentType, data)
+	return c.Stream(http.StatusOK, headers.ContentType, reader)
 }

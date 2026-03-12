@@ -381,7 +381,7 @@ func (c *swingMusicClientAuthed) LogTrack(req *models.LogTrackRequest) error {
 	return err
 }
 
-func (c *swingMusicClientAuthed) Stream(trackhash, filepath, rangeHeader string) (*models.StreamedFileHeaders, []byte, error) {
+func (c *swingMusicClientAuthed) Stream(trackhash, filepath, rangeHeader string) (*models.StreamedFileHeaders, io.ReadCloser, error) {
 	u, err := url.Parse(fmt.Sprintf("%s/file/%s/legacy", c.baseURL, trackhash))
 	if err != nil {
 		return nil, nil, err
@@ -418,11 +418,7 @@ func (c *swingMusicClientAuthed) Stream(trackhash, filepath, rangeHeader string)
 	if resp.ContentLength != -1 {
 		headers.ContentLength = int(resp.ContentLength)
 	}
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, nil, err
-	}
-	return headers, data, nil
+	return headers, resp.Body, nil
 }
 
 func (c *swingMusicClientAuthed) Playlists() (*models.Playlists, error) {
@@ -436,7 +432,7 @@ func (c *swingMusicClientAuthed) TriggerScan() error {
 	return err
 }
 
-func (c *swingMusicClientAuthed) GetThumbnailByID(thumbnailID string) (string, []byte, error) {
+func (c *swingMusicClientAuthed) GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error) {
 	url := c.GetThumbnailURL(thumbnailID)
 
 	request, err := http.NewRequest(http.MethodGet, url, nil)
@@ -451,11 +447,7 @@ func (c *swingMusicClientAuthed) GetThumbnailByID(thumbnailID string) (string, [
 	if resp.StatusCode != http.StatusOK {
 		return "", nil, fmt.Errorf("failed to get thumbnail, status: %s", resp.Status)
 	}
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", nil, err
-	}
-	return resp.Header.Get("Content-Type"), data, nil
+	return resp.Header.Get("Content-Type"), resp.Body, nil
 }
 
 func (c *swingMusicClientAuthed) Favorites() (*models.Starred, error) {
