@@ -142,6 +142,9 @@ type SwingMusicClientAuthed interface {
 	// Playlists returns all playlists for the authenticated user.
 	Playlists() (*models.Playlists, error)
 
+	// Playlist returns playlist metadata and tracks for the given playlist id.
+	Playlist(id string, includeTracks bool, start, limit int) (*models.PlaylistResponse, error)
+
 	// User returns information about the authenticated user.
 	User() (*models.User, error)
 

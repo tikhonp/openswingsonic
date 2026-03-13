@@ -31,3 +31,8 @@ type Playlist struct {
 	// 	A list of allowed usernames
 	AllowedUser []string `json:"allowedUser,omitempty"`
 }
+
+type PlaylistWithEntries struct {
+	Playlist
+	Entry []Song `json:"entry"`
+}

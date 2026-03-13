@@ -66,9 +66,10 @@ func ConfigureOpenSubsonicRoutes(
 	protected.GET("/search2.view", searchHandler.Search2)
 	protected.GET("/search3.view", searchHandler.Search3)
 
-	// Playlists: getPlaylist createPlaylist updatePlaylist deletePlaylist
+	// Playlists: createPlaylist updatePlaylist deletePlaylist
 	playlistsHandler := playlists.PlaylistsHandler{Handler: handler}
 	protected.GET("/getPlaylists.view", playlistsHandler.GetPlaylists)
+	protected.GET("/getPlaylist.view", playlistsHandler.GetPlaylist)
 
 	// Media retrieval: hls getCaptions getLyrics getAvatar getLyricsBySongId
 	mediaRetrivalHandler := mediaretrival.MediaRetrivalHandler{Handler: handler}

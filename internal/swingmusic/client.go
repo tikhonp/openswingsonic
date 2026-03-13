@@ -427,6 +427,25 @@ func (c *swingMusicClientAuthed) Playlists() (*models.Playlists, error) {
 	return doRequest[models.Playlists](c, http.MethodGet, url, nil)
 }
 
+func (c *swingMusicClientAuthed) Playlist(id string, includeTracks bool, start, limit int) (*models.PlaylistResponse, error) {
+	u, err := url.Parse(fmt.Sprintf("%s/playlists/%s", c.baseURL, id))
+	if err != nil {
+		return nil, err
+	}
+
+	q := u.Query()
+	if start > 0 {
+		q.Set("start", strconv.Itoa(start))
+	}
+	if limit > 0 {
+		q.Set("limit", strconv.Itoa(limit))
+	}
+	q.Set("no_tracks", strconv.FormatBool(!includeTracks))
+	u.RawQuery = q.Encode()
+
+	return doRequest[models.PlaylistResponse](c, http.MethodGet, u.String(), nil)
+}
+
 func (c *swingMusicClientAuthed) User() (*models.User, error) {
 	url := c.baseURL + "/auth/user"
 	return doRequest[models.User](c, http.MethodGet, url, nil)

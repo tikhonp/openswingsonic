@@ -40,3 +40,8 @@ type Settings struct {
 func (p *Playlist) GetLastUpdatedTime() (time.Time, error) {
 	return time.Parse("2006-01-02 15:04:05", p.LastUpdated)
 }
+
+type PlaylistResponse struct {
+	Info   Playlist `json:"info"`
+	Tracks []Track  `json:"tracks"`
+}
