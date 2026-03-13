@@ -30,7 +30,7 @@ func fetchArtistAlbumsCount(artistID string, c swingmusic.SwingMusicClientAuthed
 		Name:           artist.Name,
 		CoverArt:       artist.Image,
 		AlbumCount:     artist.AlbumCount,
-		ArtistImageURL: cb.GetThumbnailURL(artist.Image),
+		ArtistImageURL: cb.GetArtistImageURL(artist.ArtistHash, swingmusic.ImageSizeLarge),
 		Starred:        starred,
 		MusicBrainzID:  "", // SwingMusic does not have MusicBrainz integration
 		SortName:       artist.Name,

@@ -19,7 +19,7 @@ func mapArtistStarred2(artist *smmodels.ArtistItem, client swingmusic.SwingMusic
 		ID:             artist.Artisthash,
 		Name:           artist.Name,
 		CoverArt:       artist.Image,
-		ArtistImageURL: client.GetThumbnailURL(artist.Image),
+		ArtistImageURL: client.GetArtistImageURL(artist.Artisthash, swingmusic.ImageSizeLarge),
 		Starred:        starred,
 		SortName:       artist.Name,
 		Roles:          []string{},

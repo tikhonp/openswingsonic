@@ -15,7 +15,8 @@ services:
         APP_VERSION: dev
     environment:
       - DEBUG=true
-      - SWINGSONIC_BASE_URL=https://m...
+      - SWINGMUSIC_BASE_URL=swingmusic:1970
+      - PUBLIC_SWINGMUSIC_URL=https://m...
       - CRED_PROVIDER=file
       - USERS_FILE_PATH=users
     dns:

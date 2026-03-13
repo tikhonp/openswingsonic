@@ -30,8 +30,11 @@ type Config struct {
 	// DatabasePath specifies the path to the SQLite database file.
 	DatabasePath string
 
-	// SwingsonicBaseURL specifies the base URL for the Swingsonic server.
-	SwingsonicBaseURL string
+	// SwingMusicBaseURL specifies the base URL for the swing music server.
+	SwingMusicBaseURL string
+
+	// PublicSwingMusicURL specifies the public URL for swing music avaliable to clients.
+	PublicSwingMusicURL string
 
 	// CredentialsProvider specifies the type of credentials provider to use.
 	CredentialsProvider CredentialsProviderType
@@ -53,9 +56,14 @@ func ReadConfig() *Config {
 	if databasePath == "" {
 		log.Fatalln("FATAL: DATABASE_PATH not set")
 	}
-	swingsonicBaseURL := os.Getenv("SWINGSONIC_BASE_URL")
-	if swingsonicBaseURL == "" {
-		log.Fatalln("FATAL: SWINGSONIC_BASE_URL not set")
+	swingmusicBaseURL := os.Getenv("SWINGMUSIC_BASE_URL")
+	if swingmusicBaseURL == "" {
+		log.Fatalln("FATAL: SWINGMUSIC_BASE_URL not set")
+	}
+	publicSwingMusicURL := os.Getenv("PUBLIC_SWINGMUSIC_URL")
+	if publicSwingMusicURL == "" {
+		log.Println("WARNING: PUBLIC_SWINGMUSIC_URL not set, defaulting to SWINGMUSIC_BASE_URL")
+		publicSwingMusicURL = swingmusicBaseURL
 	}
 	credentialsProvider := CredentialsProviderType(os.Getenv("CRED_PROVIDER"))
 	if credentialsProvider == "" {
@@ -70,7 +78,8 @@ func ReadConfig() *Config {
 		Debug:               os.Getenv("DEBUG") == "true",
 		Addr:                addr,
 		DatabasePath:        databasePath,
-		SwingsonicBaseURL:   swingsonicBaseURL,
+		SwingMusicBaseURL:   swingmusicBaseURL,
+		PublicSwingMusicURL: publicSwingMusicURL,
 		CredentialsProvider: credentialsProvider,
 		UsersFilePath:       usersFilePath,
 		JSONLog:             os.Getenv("JSON_LOG") == "true",

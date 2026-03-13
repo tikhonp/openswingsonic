@@ -50,7 +50,7 @@ func mapArtistToArtistID3(
 		Name:           artist.Name,
 		CoverArt:       artist.Image,
 		AlbumCount:     artist.AlbumCount,
-		ArtistImageURL: c.GetThumbnailURL(artist.Image),
+		ArtistImageURL: c.GetArtistImageURL(artist.ArtistHash, swingmusic.ImageSizeLarge),
 		Starred:        starred,
 		MusicBrainzID:  "", // SwingMusic does not have MusicBrainz integration
 		SortName:       artist.Name,

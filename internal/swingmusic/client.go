@@ -22,11 +22,12 @@ var (
 
 // swingMusicClient implements the SwingMusicClient interface.
 type swingMusicClient struct {
-	baseURL string
+	baseURL             string
+	publicSwingMusicURL string
 }
 
-func NewClient(baseURL string) SwingMusicClient {
-	return &swingMusicClient{baseURL: baseURL}
+func NewClient(baseURL, publicSwingMusicURL string) SwingMusicClient {
+	return &swingMusicClient{baseURL: baseURL, publicSwingMusicURL: publicSwingMusicURL}
 }
 
 func (c *swingMusicClient) Login(username, password string) (authCookie *http.Cookie, err error) {
@@ -63,20 +64,20 @@ func (c *swingMusicClient) Login(username, password string) (authCookie *http.Co
 
 func (c *swingMusicClient) GetAlbumImageURL(albumHash string, size ImageSize) string {
 	if size == ImageSizeLarge {
-		return fmt.Sprintf("%s/img/thumbnail/%s.webp", c.baseURL, albumHash)
+		return fmt.Sprintf("%s/img/thumbnail/%s.webp", c.publicSwingMusicURL, albumHash)
 	}
-	return fmt.Sprintf("%s/img/thumbnail/%s/%s.webp", c.baseURL, size, albumHash)
+	return fmt.Sprintf("%s/img/thumbnail/%s/%s.webp", c.publicSwingMusicURL, size, albumHash)
 }
 
 func (c *swingMusicClient) GetArtistImageURL(artistHash string, size ImageSize) string {
 	if size == ImageSizeLarge {
-		return fmt.Sprintf("%s/img/artist/%s.webp", c.baseURL, artistHash)
+		return fmt.Sprintf("%s/img/artist/%s.webp", c.publicSwingMusicURL, artistHash)
 	}
-	return fmt.Sprintf("%s/img/artist/%s/%s.webp", c.baseURL, size, artistHash)
+	return fmt.Sprintf("%s/img/artist/%s/%s.webp", c.publicSwingMusicURL, size, artistHash)
 }
 
 func (c *swingMusicClient) GetThumbnailURL(thumbnailID string) string {
-	return fmt.Sprintf("%s/img/thumbnail/%s", c.baseURL, thumbnailID)
+	return fmt.Sprintf("%s/img/thumbnail/%s", c.publicSwingMusicURL, thumbnailID)
 }
 
 // swingMusicClientAuthed implements the SwingMusicClientAuthed interface.
@@ -433,7 +434,7 @@ func (c *swingMusicClientAuthed) TriggerScan() error {
 }
 
 func (c *swingMusicClientAuthed) GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error) {
-	url := c.GetThumbnailURL(thumbnailID)
+	url := fmt.Sprintf("%s/img/thumbnail/%s", c.baseURL, thumbnailID)
 
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {

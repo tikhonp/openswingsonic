@@ -40,7 +40,7 @@ func main() {
 		panic(err)
 	}
 
-	client := swingmusic.NewClient(cfg.SwingsonicBaseURL)
+	client := swingmusic.NewClient(cfg.SwingMusicBaseURL, cfg.PublicSwingMusicURL)
 
 	e := echo.New()
 
