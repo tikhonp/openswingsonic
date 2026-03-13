@@ -427,6 +427,16 @@ func (c *swingMusicClientAuthed) Playlists() (*models.Playlists, error) {
 	return doRequest[models.Playlists](c, http.MethodGet, url, nil)
 }
 
+func (c *swingMusicClientAuthed) User() (*models.User, error) {
+	url := c.baseURL + "/auth/user"
+	return doRequest[models.User](c, http.MethodGet, url, nil)
+}
+
+func (c *swingMusicClientAuthed) NotSettings() (*models.NotSettings, error) {
+	url := c.baseURL + "/notsettings"
+	return doRequest[models.NotSettings](c, http.MethodGet, url, nil)
+}
+
 func (c *swingMusicClientAuthed) TriggerScan() error {
 	url := c.baseURL + "/notsettings/trigger-scan"
 	_, err := doRequest[any](c, http.MethodGet, url, nil)

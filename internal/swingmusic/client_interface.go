@@ -142,6 +142,12 @@ type SwingMusicClientAuthed interface {
 	// Playlists returns all playlists for the authenticated user.
 	Playlists() (*models.Playlists, error)
 
+	// User returns information about the authenticated user.
+	User() (*models.User, error)
+
+	// NotSettings returns server configuration from the /notsettings endpoint.
+	NotSettings() (*models.NotSettings, error)
+
 	// TriggerScan triggers a media library scan on the server.
 	TriggerScan() error
 

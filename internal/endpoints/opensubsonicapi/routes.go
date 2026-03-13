@@ -12,6 +12,7 @@ import (
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/playlists"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/search"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/system"
+	usermanagement "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/user_management"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
 	opensubsonicauth "github.com/tikhonp/openswingsonic/internal/middleware/opensubsonic_auth"
 	"github.com/tikhonp/openswingsonic/internal/swingmusic"
@@ -91,7 +92,9 @@ func ConfigureOpenSubsonicRoutes(
 
 	// Chat	getChatMessages addChatMessage
 
-	// User management	getUser getUsers createUser updateUser deleteUser changePassword
+	// User management	getUsers createUser updateUser deleteUser changePassword
+	userManagementHandler := usermanagement.SystemHandler{Handler: handler}
+	protected.GET("/getUser.view", userManagementHandler.GetUser)
 
 	// Bookmarks	getBookmarks createBookmark deleteBookmark getPlayQueue savePlayQueue
 
