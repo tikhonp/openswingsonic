@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // https://opensubsonic.netlify.app/docs/responses/indexes/
 
 type Indexes struct {
@@ -14,7 +16,7 @@ type Index struct {
 }
 
 type Artist struct {
-	ID      string  `json:"id"`
-	Name    string  `json:"name"`
-	Starred *string `json:"starred,omitempty"`
+	ID      string     `json:"id"`
+	Name    string     `json:"name"`
+	Starred *time.Time `json:"starred,omitempty"`
 }

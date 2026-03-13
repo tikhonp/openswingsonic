@@ -3,3 +3,4 @@ compose.yaml
 storage/
 test/
 tmp/
+test.rest

@@ -52,7 +52,7 @@ type Song struct {
 	Size               int64            `json:"size"`
 	ContentType        string           `json:"contentType"`
 	Suffix             string           `json:"suffix"`
-	Starred            time.Time        `json:"starred"`
+	Starred            *time.Time       `json:"starred,omitempty"`
 	Duration           int64            `json:"duration"`
 	BitRate            int64            `json:"bitRate"`
 	BitDepth           int64            `json:"bitDepth"`
@@ -91,9 +91,9 @@ type ArtistFromSong struct {
 }
 
 type Contributor struct {
-	Role    string          `json:"role"`
+	Role    string    `json:"role"`
 	Artist  ArtistID3 `json:"artist"`
-	SubRole *string         `json:"subRole,omitempty"`
+	SubRole *string   `json:"subRole,omitempty"`
 }
 
 type ReplayGain struct {

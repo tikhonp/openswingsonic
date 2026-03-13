@@ -27,37 +27,37 @@ type AlbumStarred struct {
 }
 
 type ArtistStared struct {
-	ID       string    `json:"id"`
-	Name     string    `json:"name"`
-	CoverArt string    `json:"coverArt"`
-	Starred  time.Time `json:"starred"`
+	ID       string     `json:"id"`
+	Name     string     `json:"name"`
+	CoverArt string     `json:"coverArt"`
+	Starred  *time.Time `json:"starred,omitempty"`
 }
 
 type SongStarred struct {
-	ID           string    `json:"id"`
-	Parent       string    `json:"parent"`
-	IsDir        bool      `json:"isDir"`
-	Title        string    `json:"title"`
-	Album        string    `json:"album"`
-	Artist       string    `json:"artist"`
-	Track        int64     `json:"track"`
-	Year         int64     `json:"year"`
-	CoverArt     string    `json:"coverArt"`
-	Size         int64     `json:"size"`
-	ContentType  string    `json:"contentType"`
-	Suffix       string    `json:"suffix"`
-	Starred      time.Time `json:"starred"`
-	Duration     int64     `json:"duration"`
-	BitRate      int64     `json:"bitRate"`
-	BitDepth     int64     `json:"bitDepth"`
-	SamplingRate int64     `json:"samplingRate"`
-	ChannelCount int64     `json:"channelCount"`
-	Path         string    `json:"path"`
-	PlayCount    int64     `json:"playCount"`
-	DiscNumber   int64     `json:"discNumber"`
-	Created      time.Time `json:"created"`
-	AlbumID      string    `json:"albumId"`
-	ArtistID     string    `json:"artistId"`
-	Type         string    `json:"type"`
-	IsVideo      bool      `json:"isVideo"`
+	ID           string     `json:"id"`
+	Parent       string     `json:"parent"`
+	IsDir        bool       `json:"isDir"`
+	Title        string     `json:"title"`
+	Album        string     `json:"album"`
+	Artist       string     `json:"artist"`
+	Track        int64      `json:"track"`
+	Year         int64      `json:"year"`
+	CoverArt     string     `json:"coverArt"`
+	Size         int64      `json:"size"`
+	ContentType  string     `json:"contentType"`
+	Suffix       string     `json:"suffix"`
+	Starred      *time.Time `json:"starred,omitempty"`
+	Duration     int64      `json:"duration"`
+	BitRate      int64      `json:"bitRate"`
+	BitDepth     int64      `json:"bitDepth"`
+	SamplingRate int64      `json:"samplingRate"`
+	ChannelCount int64      `json:"channelCount"`
+	Path         string     `json:"path"`
+	PlayCount    int64      `json:"playCount"`
+	DiscNumber   int64      `json:"discNumber"`
+	Created      time.Time  `json:"created"`
+	AlbumID      string     `json:"albumId"`
+	ArtistID     string     `json:"artistId"`
+	Type         string     `json:"type"`
+	IsVideo      bool       `json:"isVideo"`
 }

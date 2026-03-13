@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // https://opensubsonic.netlify.app/docs/responses/artistwithalbumsid3/
 
 type ArtistWithAlbumsID3 struct {
@@ -14,9 +16,9 @@ type ArtistWithAlbumsID3 struct {
 	// 	Artist album count.
 	AlbumCount int `json:"albumCount,omitempty"`
 	// Date the artist was starred. [ISO 8601].
-	Starred string `json:"starred"`
+	Starred *time.Time `json:"starred,omitempty"`
 	// The artist MusicBrainzID.
-	MusicBrainzID string `json:"musicBrainzId"`
+	MusicBrainzID *string `json:"musicBrainzId,omitempty"`
 	// The artist sort name.
 	SortName string `json:"sortName"`
 	// The list of all roles this artist has in the library.

@@ -12,11 +12,12 @@ import (
 )
 
 func mapArtistStarred(starred *smmodels.ArtistItem) osmodels.ArtistStared {
+	now := time.Now().UTC()
 	return osmodels.ArtistStared{
 		ID:       starred.Artisthash,
 		Name:     starred.Name,
 		CoverArt: starred.Image,
-		Starred:  time.Now(),
+		Starred:  &now,
 	}
 }
 
@@ -51,7 +52,7 @@ func mapSongStarred(starred *smmodels.Track) osmodels.SongStarred {
 	}
 
 	fileExtenstion := filepath.Ext(starred.Filepath)
-
+	now := time.Now().UTC()
 	return osmodels.SongStarred{
 		ID:           starred.Trackhash,
 		Parent:       starred.Albumhash,
@@ -65,7 +66,7 @@ func mapSongStarred(starred *smmodels.Track) osmodels.SongStarred {
 		Size:         starred.Extra.Filesize,
 		ContentType:  mime.TypeByExtension(fileExtenstion),
 		Suffix:       fileExtenstion[1:],
-		Starred:      time.Now(),
+		Starred:      &now,
 		Duration:     starred.Duration,
 		BitRate:      starred.Bitrate,
 		BitDepth:     starred.Extra.Bitdepth,

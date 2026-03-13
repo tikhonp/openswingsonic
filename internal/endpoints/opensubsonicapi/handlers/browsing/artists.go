@@ -21,9 +21,10 @@ func fetchArtistAlbumsCount(artistID string, c swingmusic.SwingMusicClientAuthed
 		return nil, err
 	}
 	artist := artistDetail.Artist
-	var starred string
+	var starred *time.Time = nil
 	if artist.IsFavorite {
-		starred = time.Unix(0, 0).Format(time.RFC3339)
+		now := time.Now().UTC()
+		starred = &now
 	}
 	return &osmodels.ArtistID3{
 		ID:             artist.ArtistHash,
@@ -32,7 +33,7 @@ func fetchArtistAlbumsCount(artistID string, c swingmusic.SwingMusicClientAuthed
 		AlbumCount:     artist.AlbumCount,
 		ArtistImageURL: cb.GetArtistImageURL(artist.ArtistHash, swingmusic.ImageSizeLarge),
 		Starred:        starred,
-		MusicBrainzID:  "", // SwingMusic does not have MusicBrainz integration
+		MusicBrainzID:  nil, // SwingMusic does not have MusicBrainz integration
 		SortName:       artist.Name,
 		Roles:          []string{},
 	}, nil

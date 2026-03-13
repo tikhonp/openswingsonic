@@ -41,9 +41,10 @@ func mapArtistToArtistID3(
 	artist *smmodels.ArtistDetail,
 	c swingmusic.SwingMusicClient,
 ) *osmodels.ArtistWithAlbumsID3 {
-	var starred string
+	var starred *time.Time = nil
 	if artist.IsFavorite {
-		starred = time.Unix(0, 0).Format(time.RFC3339)
+		now := time.Now().UTC()
+		starred = &now
 	}
 	return &osmodels.ArtistWithAlbumsID3{
 		ID:             artist.ArtistHash,
@@ -52,7 +53,7 @@ func mapArtistToArtistID3(
 		AlbumCount:     artist.AlbumCount,
 		ArtistImageURL: c.GetArtistImageURL(artist.ArtistHash, swingmusic.ImageSizeLarge),
 		Starred:        starred,
-		MusicBrainzID:  "", // SwingMusic does not have MusicBrainz integration
+		MusicBrainzID:  nil, // SwingMusic does not have MusicBrainz integration
 		SortName:       artist.Name,
 		Roles:          []string{},
 	}

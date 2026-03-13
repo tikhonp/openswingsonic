@@ -13,14 +13,13 @@ import (
 )
 
 func mapArtistStarred2(artist *smmodels.ArtistItem, client swingmusic.SwingMusicClient) osmodels.ArtistID3 {
-	starred := time.Now().UTC().Format(time.RFC3339)
-
+	starred := time.Now().UTC()
 	return osmodels.ArtistID3{
 		ID:             artist.Artisthash,
 		Name:           artist.Name,
 		CoverArt:       artist.Image,
 		ArtistImageURL: client.GetArtistImageURL(artist.Artisthash, swingmusic.ImageSizeLarge),
-		Starred:        starred,
+		Starred:        &starred,
 		SortName:       artist.Name,
 		Roles:          []string{},
 	}
@@ -62,11 +61,11 @@ func mapAlbumStarred2(album *smmodels.AlbumShortInfo) osmodels.AlbumID3 {
 }
 
 func mapSongStarred2(track *smmodels.Track) osmodels.Song {
-	starred := time.Now().UTC()
+	now := time.Now().UTC()
 
 	song := browsing.MapTrackToChild(track)
-	song.Starred = starred
-	song.Created = starred
+	song.Starred = &now
+	song.Created = now
 	song.PlayCount = 0
 	song.MediaType = "audio"
 
