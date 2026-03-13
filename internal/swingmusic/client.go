@@ -474,8 +474,32 @@ func (c *swingMusicClientAuthed) GetThumbnailByID(thumbnailID string) (string, i
 	if err != nil {
 		return "", nil, err
 	}
+	if resp.StatusCode == http.StatusNotFound {
+		return "", nil, ErrNotFound
+	}
 	if resp.StatusCode != http.StatusOK {
 		return "", nil, fmt.Errorf("failed to get thumbnail, status: %s", resp.Status)
+	}
+	return resp.Header.Get("Content-Type"), resp.Body, nil
+}
+
+func (c *swingMusicClientAuthed) GetArtistImageByID(artistImageID string) (string, io.ReadCloser, error) {
+	url := fmt.Sprintf("%s/img/artist/%s", c.baseURL, artistImageID)
+
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", nil, err
+	}
+	request.AddCookie(c.authCookie)
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return "", nil, err
+	}
+	if resp.StatusCode == http.StatusNotFound {
+		return "", nil, ErrNotFound
+	}
+	if resp.StatusCode != http.StatusOK {
+		return "", nil, fmt.Errorf("failed to get artist image, status: %s", resp.Status)
 	}
 	return resp.Header.Get("Content-Type"), resp.Body, nil
 }

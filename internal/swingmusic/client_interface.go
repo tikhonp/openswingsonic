@@ -157,4 +157,8 @@ type SwingMusicClientAuthed interface {
 	// GetThumbnailByID returns the URL for the thumbnail image with the given ID.
 	// returns content type, image reader and error if any.
 	GetThumbnailByID(thumbnailID string) (string, io.ReadCloser, error)
+
+	// GetArtistImageByID returns the image for the artist with the given ID.
+	// returns content type, image reader and error if any.
+	GetArtistImageByID(artistImageID string) (string, io.ReadCloser, error)
 }
