@@ -10,6 +10,7 @@ import (
 	"github.com/tikhonp/openswingsonic/internal/config"
 	"github.com/tikhonp/openswingsonic/internal/db"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi"
+	swmiddleware "github.com/tikhonp/openswingsonic/internal/middleware"
 	opensubsonicauth "github.com/tikhonp/openswingsonic/internal/middleware/opensubsonic_auth"
 	smcredentialsprovider "github.com/tikhonp/openswingsonic/internal/sm_credentials_provider"
 	"github.com/tikhonp/openswingsonic/internal/swingmusic"
@@ -58,6 +59,7 @@ func main() {
 		return c.String(http.StatusOK, "Never gonna give you up!")
 	})
 
+	e.Pre(swmiddleware.CutViewSuffix)
 	credentialProvider, err := credentialProvider(cfg, database)
 	if err != nil {
 		e.Logger.Fatal("Failed to initialize credentials provider: ", err)

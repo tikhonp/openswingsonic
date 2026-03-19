@@ -31,57 +31,57 @@ func ConfigureOpenSubsonicRoutes(
 
 	// System:
 	systemHandler := system.SystemHandler{Handler: handler}
-	protected.GET("/ping.view", systemHandler.Ping)
-	protected.GET("/getLicense.view", systemHandler.GetLicense)
+	protected.GET("/ping", systemHandler.Ping)
+	protected.GET("/getLicense", systemHandler.GetLicense)
 	// Note: Unlike all other APIs getOpenSubsonicExtensions must be publicly accessible.
-	g.GET("/getOpenSubsonicExtensions.view", systemHandler.GetOpenSubsonicExtensions)
-	protected.GET("/tokenInfo.view", systemHandler.TokenInfo)
+	g.GET("/getOpenSubsonicExtensions", systemHandler.GetOpenSubsonicExtensions)
+	protected.GET("/tokenInfo", systemHandler.TokenInfo)
 
 	// Browsing: getVideos getVideoInfo getSimilarSongs getSimilarSongs2
 	browsingHandler := browsing.BrowsingHandler{Handler: handler}
-	protected.GET("/getMusicFolders.view", browsingHandler.GetMusicFolders)
-	protected.GET("/getIndexes.view", browsingHandler.GetIndexes)
-	protected.GET("/getMusicDirectory.view", browsingHandler.GetMusicDirectory)
-	protected.GET("/getGenres.view", browsingHandler.GetGenres)
-	protected.GET("/getArtists.view", browsingHandler.GetArtists)
-	protected.GET("/getArtist.view", browsingHandler.GetArtist)
-	protected.GET("/getAlbum.view", browsingHandler.GetAlbum)
-	protected.GET("/getSong.view", browsingHandler.GetSong)
-	protected.GET("/getArtistInfo.view", browsingHandler.GetArtistInfo)
-	protected.GET("/getArtistInfo2.view", browsingHandler.GetArtistInfo)
-	protected.GET("/getAlbumInfo.view", browsingHandler.GetAlbumInfo)
-	protected.GET("/getAlbumInfo2.view", browsingHandler.GetAlbumInfo)
-	protected.GET("/getTopSongs.view", browsingHandler.GetTopSongs)
+	protected.GET("/getMusicFolders", browsingHandler.GetMusicFolders)
+	protected.GET("/getIndexes", browsingHandler.GetIndexes)
+	protected.GET("/getMusicDirectory", browsingHandler.GetMusicDirectory)
+	protected.GET("/getGenres", browsingHandler.GetGenres)
+	protected.GET("/getArtists", browsingHandler.GetArtists)
+	protected.GET("/getArtist", browsingHandler.GetArtist)
+	protected.GET("/getAlbum", browsingHandler.GetAlbum)
+	protected.GET("/getSong", browsingHandler.GetSong)
+	protected.GET("/getArtistInfo", browsingHandler.GetArtistInfo)
+	protected.GET("/getArtistInfo2", browsingHandler.GetArtistInfo)
+	protected.GET("/getAlbumInfo", browsingHandler.GetAlbumInfo)
+	protected.GET("/getAlbumInfo2", browsingHandler.GetAlbumInfo)
+	protected.GET("/getTopSongs", browsingHandler.GetTopSongs)
 
 	// Album/song lists: getRandomSongs getSongsByGenre getNowPlaying
 	albumSongListsHandler := albumsonglists.AlbumSongListsHandler{Handler: handler}
-	protected.GET("/getAlbumList.view", albumSongListsHandler.GetAlbumList)
-	protected.GET("/getAlbumList2.view", albumSongListsHandler.GetAlbumList2)
-	protected.GET("/getStarred.view", albumSongListsHandler.GetStarred)
-	protected.GET("/getStarred2.view", albumSongListsHandler.GetStarred2)
+	protected.GET("/getAlbumList", albumSongListsHandler.GetAlbumList)
+	protected.GET("/getAlbumList2", albumSongListsHandler.GetAlbumList2)
+	protected.GET("/getStarred", albumSongListsHandler.GetStarred)
+	protected.GET("/getStarred2", albumSongListsHandler.GetStarred2)
 
 	// Searching:
 	searchHandler := search.SearchHandler{Handler: handler}
-	protected.GET("/search.view", searchHandler.Search)
-	protected.GET("/search2.view", searchHandler.Search2)
-	protected.GET("/search3.view", searchHandler.Search3)
+	protected.GET("/search", searchHandler.Search)
+	protected.GET("/search2", searchHandler.Search2)
+	protected.GET("/search3", searchHandler.Search3)
 
 	// Playlists: createPlaylist updatePlaylist deletePlaylist
 	playlistsHandler := playlists.PlaylistsHandler{Handler: handler}
-	protected.GET("/getPlaylists.view", playlistsHandler.GetPlaylists)
-	protected.GET("/getPlaylist.view", playlistsHandler.GetPlaylist)
+	protected.GET("/getPlaylists", playlistsHandler.GetPlaylists)
+	protected.GET("/getPlaylist", playlistsHandler.GetPlaylist)
 
 	// Media retrieval: hls getCaptions getLyrics getAvatar getLyricsBySongId
 	mediaRetrivalHandler := mediaretrival.MediaRetrivalHandler{Handler: handler}
-	protected.GET("/getCoverArt.view", mediaRetrivalHandler.GetCoverArt)
-	protected.GET("/stream.view", mediaRetrivalHandler.Stream)
-	protected.GET("/download.view", mediaRetrivalHandler.Stream)
+	protected.GET("/getCoverArt", mediaRetrivalHandler.GetCoverArt)
+	protected.GET("/stream", mediaRetrivalHandler.Stream)
+	protected.GET("/download", mediaRetrivalHandler.Stream)
 
 	// Media annotation: setRating
 	mediaAnnotationHandler := mediaannotation.MediaAnnotationHandler{Handler: handler}
-	protected.GET("/star.view", mediaAnnotationHandler.Star)
-	protected.GET("/unstar.view", mediaAnnotationHandler.Unstar)
-	protected.GET("/scrobble.view", mediaAnnotationHandler.Scrobble)
+	protected.GET("/star", mediaAnnotationHandler.Star)
+	protected.GET("/unstar", mediaAnnotationHandler.Unstar)
+	protected.GET("/scrobble", mediaAnnotationHandler.Scrobble)
 
 	// Sharing	getShares createShare updateShare deleteShare
 
@@ -95,12 +95,12 @@ func ConfigureOpenSubsonicRoutes(
 
 	// User management	getUsers createUser updateUser deleteUser changePassword
 	userManagementHandler := usermanagement.SystemHandler{Handler: handler}
-	protected.GET("/getUser.view", userManagementHandler.GetUser)
+	protected.GET("/getUser", userManagementHandler.GetUser)
 
 	// Bookmarks	getBookmarks createBookmark deleteBookmark getPlayQueue savePlayQueue
 
 	// Media library scanning
 	mediaLibraryScanningHandler := medialibraryscanning.MediaLibraryScanningHandler{Handler: handler}
-	protected.GET("/getScanStatus.view", mediaLibraryScanningHandler.GetScanStatus)
-	protected.GET("/startScan.view", mediaLibraryScanningHandler.StartScan)
+	protected.GET("/getScanStatus", mediaLibraryScanningHandler.GetScanStatus)
+	protected.GET("/startScan", mediaLibraryScanningHandler.StartScan)
 }
