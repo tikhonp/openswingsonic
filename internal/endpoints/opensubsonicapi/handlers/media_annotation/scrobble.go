@@ -1,6 +1,8 @@
 package mediaannotation
 
 import (
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
@@ -9,7 +11,7 @@ import (
 
 type ScrobbleRequest struct {
 	ID         string `query:"id" form:"id" validate:"required"`
-	Time       int64  `query:"time" form:"time" validate:"required"`
+	Time       int64  `query:"time" form:"time"`
 	Submission bool   `query:"submission" form:"submission"`
 }
 
@@ -39,9 +41,12 @@ func (h *MediaAnnotationHandler) Scrobble(c echo.Context) error {
 			duration = 240
 		}
 
-		timestamp := req.Time
-		if timestamp > 10_000_000_000 {
-			timestamp = timestamp / 1000
+		// Time field may be empty i assume
+		timestamp := time.Now().Unix()
+		if req.Time != 0 && timestamp > 10_000_000_000 {
+			timestamp = req.Time / 1000
+		} else if req.Time != 0 {
+			timestamp = req.Time
 		}
 
 		logReq := &smmodels.LogTrackRequest{
