@@ -3,6 +3,7 @@ package browsing
 import (
 	"mime"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -187,6 +188,12 @@ func mapSwingAlbumToAlbumID3WithSongs(
 			MapTrackToChild(&t),
 		)
 	}
+	sort.Slice(songs, func(i, j int) bool {
+		if songs[i].DiscNumber != songs[j].DiscNumber {
+			return songs[i].DiscNumber < songs[j].DiscNumber
+		}
+		return songs[i].Track < songs[j].Track
+	})
 	out.Song = songs
 
 	return out
