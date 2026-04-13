@@ -2,5 +2,5 @@ users
 compose.yaml
 storage/
 test/
-tmp/
+llmtmp/
 test.rest
