@@ -2,9 +2,11 @@ package models
 
 // SearchResult returned by search endpoint.
 type SearchResult struct {
-	Artist []Artist   `json:"artist,omitempty" xml:"artist,omitempty"`
-	Album  []AlbumID3 `json:"album,omitempty" xml:"album,omitempty"`
-	Song   []Song     `json:"song,omitempty" xml:"song,omitempty"`
+	Artist    []Artist   `json:"artist,omitempty" xml:"artist,omitempty"`
+	Album     []AlbumID3 `json:"album,omitempty" xml:"album,omitempty"`
+	Song      []Song     `json:"song,omitempty" xml:"song,omitempty"`
+	Offset    int        `json:"offset,omitempty" xml:"offset,attr,omitempty"`
+	TotalHits int        `json:"totalHits,omitempty" xml:"totalHits,attr,omitempty"`
 }
 
 // SearchResult2 returned by search2 endpoint.

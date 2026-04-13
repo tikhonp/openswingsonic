@@ -3,6 +3,7 @@ package browsing
 import (
 	"sort"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/labstack/echo/v4"
@@ -47,8 +48,11 @@ func mapArtistsToIndexes(in *smmodels.Artists) osmodels.Indexes {
 		return indexes[i].Name < indexes[j].Name
 	})
 
+	lastModified := time.Now().UnixMilli()
+
 	return osmodels.Indexes{
-		Index: indexes,
+		Index:        indexes,
+		LastModified: &lastModified,
 	}
 }
 

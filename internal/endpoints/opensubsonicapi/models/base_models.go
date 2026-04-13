@@ -2,16 +2,16 @@
 package models
 
 type SubsonicBase struct {
-	Status        string `json:"status" xml:"status"`
-	Version       string `json:"version" xml:"version"`
-	Type          string `json:"type" xml:"type"`
-	ServerVersion string `json:"serverVersion" xml:"serverVersion"`
-	OpenSubsonic  bool   `json:"openSubsonic" xml:"openSubsonic"`
+	Status        string `json:"status" xml:"status,attr"`
+	Version       string `json:"version" xml:"version,attr"`
+	Type          string `json:"type" xml:"type,attr,omitempty"`
+	ServerVersion string `json:"serverVersion" xml:"serverVersion,attr,omitempty"`
+	OpenSubsonic  bool   `json:"openSubsonic" xml:"openSubsonic,attr,omitempty"`
 }
 
 type SubsonicError struct {
-	Code    int    `json:"code" xml:"code"`
-	Message string `json:"message" xml:"message"`
+	Code    int    `json:"code" xml:"code,attr"`
+	Message string `json:"message" xml:"message,attr,omitempty"`
 }
 
 func (e SubsonicError) Error() string {

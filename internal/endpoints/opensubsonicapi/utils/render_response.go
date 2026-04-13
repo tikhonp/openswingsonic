@@ -13,12 +13,12 @@ import (
 
 // subsonicResponseXML is the root structure for XML responses.
 type subsonicResponseXML struct {
-	XMLName       xml.Name `xml:"subsonic-response"`
+	XMLName       xml.Name `xml:"http://subsonic.org/restapi subsonic-response"`
 	Status        string   `xml:"status,attr"`
 	Version       string   `xml:"version,attr"`
-	Type          string   `xml:"type,attr"`
-	ServerVersion string   `xml:"serverVersion,attr"`
-	OpenSubsonic  bool     `xml:"openSubsonic,attr"`
+	Type          string   `xml:"type,attr,omitempty"`
+	ServerVersion string   `xml:"serverVersion,attr,omitempty"`
+	OpenSubsonic  bool     `xml:"openSubsonic,attr,omitempty"`
 	InnerXML      string   `xml:",innerxml"` // optional child elements
 }
 

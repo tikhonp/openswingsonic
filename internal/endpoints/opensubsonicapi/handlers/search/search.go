@@ -36,7 +36,7 @@ func sliceWithOffset[T any](items []T, offset, count int) []T {
 	if count <= 0 || offset >= len(items) {
 		return []T{}
 	}
-	end := min(offset + count, len(items))
+	end := min(offset+count, len(items))
 	return items[offset:end]
 }
 
@@ -154,6 +154,10 @@ func (h *SearchHandler) Search(c echo.Context) error {
 		Artist: mapSearchArtistsBasic(artists.Results, artistOffset, artistCount),
 		Album:  mapAlbumShortInfos(albums.Results, albumOffset, albumCount),
 		Song:   mapTracks(songs.Results, songOffset, songCount),
+		Offset: min(artistOffset, min(albumOffset, songOffset)),
+		TotalHits: len(artists.Results) +
+			len(albums.Results) +
+			len(songs.Results),
 	}
 
 	return utils.RenderResponse(c, "searchResult", result)

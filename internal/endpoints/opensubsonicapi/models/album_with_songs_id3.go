@@ -3,85 +3,85 @@ package models
 import "time"
 
 type AlbumID3WithSongs struct {
-	ID                  string        `json:"id" xml:"id"`
-	Name                string        `json:"name" xml:"name"`
-	Version             string        `json:"version" xml:"version"`
-	Artist              string        `json:"artist" xml:"artist"`
-	Year                int           `json:"year" xml:"year"`
-	CoverArt            string        `json:"coverArt" xml:"coverArt"`
-	Starred             *time.Time    `json:"starred,omitempty" xml:"starred,omitempty"`
-	Duration            int           `json:"duration" xml:"duration"`
-	PlayCount           int           `json:"playCount" xml:"playCount"`
-	Genre               string        `json:"genre" xml:"genre"`
-	Created             time.Time     `json:"created" xml:"created"`
-	ArtistID            string        `json:"artistId" xml:"artistId"`
-	SongCount           int           `json:"songCount" xml:"songCount"`
-	Played              time.Time     `json:"played" xml:"played"`
-	UserRating          int           `json:"userRating" xml:"userRating"`
+	ID                  string        `json:"id" xml:"id,attr"`
+	Name                string        `json:"name" xml:"name,attr"`
+	Version             string        `json:"version" xml:"version,attr"`
+	Artist              string        `json:"artist" xml:"artist,attr"`
+	Year                int           `json:"year" xml:"year,attr"`
+	CoverArt            string        `json:"coverArt" xml:"coverArt,attr"`
+	Starred             *time.Time    `json:"starred,omitempty" xml:"starred,attr,omitempty"`
+	Duration            int           `json:"duration" xml:"duration,attr"`
+	PlayCount           int           `json:"playCount" xml:"playCount,attr"`
+	Genre               string        `json:"genre" xml:"genre,attr"`
+	Created             time.Time     `json:"created" xml:"created,attr"`
+	ArtistID            string        `json:"artistId" xml:"artistId,attr"`
+	SongCount           int           `json:"songCount" xml:"songCount,attr"`
+	Played              time.Time     `json:"played" xml:"played,attr"`
+	UserRating          int           `json:"userRating" xml:"userRating,attr"`
 	RecordLabels        []RecordLabel `json:"recordLabels" xml:"recordLabels"`
-	MusicBrainzID       string        `json:"musicBrainzId" xml:"musicBrainzId"`
+	MusicBrainzID       string        `json:"musicBrainzId" xml:"musicBrainzId,attr"`
 	Genres              []ItemGenre   `json:"genres" xml:"genres"`
 	Artists             []ArtistID3   `json:"artists" xml:"artists"`
-	DisplayArtist       string        `json:"displayArtist" xml:"displayArtist"`
+	DisplayArtist       string        `json:"displayArtist" xml:"displayArtist,attr"`
 	ReleaseTypes        []string      `json:"releaseTypes" xml:"releaseTypes"`
 	Moods               []string      `json:"moods" xml:"moods"`
-	SortName            string        `json:"sortName" xml:"sortName"`
+	SortName            string        `json:"sortName" xml:"sortName,attr"`
 	OriginalReleaseDate ItemDate      `json:"originalReleaseDate" xml:"originalReleaseDate"`
 	ReleaseDate         ItemDate      `json:"releaseDate" xml:"releaseDate"`
-	IsCompilation       bool          `json:"isCompilation" xml:"isCompilation"`
-	ExplicitStatus      string        `json:"explicitStatus" xml:"explicitStatus"`
+	IsCompilation       bool          `json:"isCompilation" xml:"isCompilation,attr"`
+	ExplicitStatus      string        `json:"explicitStatus" xml:"explicitStatus,attr"`
 	DiscTitles          []DiscTitle   `json:"discTitles" xml:"discTitles"`
 	Song                []Song        `json:"song" xml:"song"`
 
-	Parent string `json:"parent" xml:"parent"`
-	Album  string `json:"album" xml:"album"`
-	Title  string `json:"title" xml:"title"`
-	IsDir  bool   `json:"isDir" xml:"isDir"`
+	Parent string `json:"parent" xml:"parent,attr"`
+	Album  string `json:"album" xml:"album,attr"`
+	Title  string `json:"title" xml:"title,attr"`
+	IsDir  bool   `json:"isDir" xml:"isDir,attr"`
 }
 
 type Song struct {
-	ID                 string           `json:"id" xml:"id"`
-	Parent             string           `json:"parent" xml:"parent"`
-	IsDir              bool             `json:"isDir" xml:"isDir"`
-	Title              string           `json:"title" xml:"title"`
-	Album              string           `json:"album" xml:"album"`
-	Artist             string           `json:"artist" xml:"artist"`
-	Track              int64            `json:"track" xml:"track"`
-	Year               int64            `json:"year" xml:"year"`
-	CoverArt           string           `json:"coverArt" xml:"coverArt"`
-	Size               int64            `json:"size" xml:"size"`
-	ContentType        string           `json:"contentType" xml:"contentType"`
-	Suffix             string           `json:"suffix" xml:"suffix"`
-	Starred            *time.Time       `json:"starred,omitempty" xml:"starred,omitempty"`
-	Duration           int64            `json:"duration" xml:"duration"`
-	BitRate            int64            `json:"bitRate" xml:"bitRate"`
-	BitDepth           int64            `json:"bitDepth" xml:"bitDepth"`
-	SamplingRate       int64            `json:"samplingRate" xml:"samplingRate"`
-	ChannelCount       int64            `json:"channelCount" xml:"channelCount"`
-	Path               string           `json:"path" xml:"path"`
-	PlayCount          int64            `json:"playCount" xml:"playCount"`
-	Played             time.Time        `json:"played" xml:"played"`
-	DiscNumber         int64            `json:"discNumber" xml:"discNumber"`
-	Created            time.Time        `json:"created" xml:"created"`
-	AlbumID            string           `json:"albumId" xml:"albumId"`
-	ArtistID           string           `json:"artistId" xml:"artistId"`
-	Type               string           `json:"type" xml:"type"`
-	MediaType          string           `json:"mediaType" xml:"mediaType"`
-	IsVideo            bool             `json:"isVideo" xml:"isVideo"`
-	BPM                int64            `json:"bpm" xml:"bpm"`
-	Comment            string           `json:"comment" xml:"comment"`
-	SortName           string           `json:"sortName" xml:"sortName"`
-	MusicBrainzID      string           `json:"musicBrainzId" xml:"musicBrainzId"`
+	ID                 string           `json:"id" xml:"id,attr"`
+	Parent             string           `json:"parent" xml:"parent,attr"`
+	IsDir              bool             `json:"isDir" xml:"isDir,attr"`
+	Title              string           `json:"title" xml:"title,attr"`
+	Album              string           `json:"album" xml:"album,attr"`
+	Artist             string           `json:"artist" xml:"artist,attr"`
+	Track              int64            `json:"track" xml:"track,attr"`
+	Year               int64            `json:"year" xml:"year,attr"`
+	CoverArt           string           `json:"coverArt" xml:"coverArt,attr"`
+	Size               int64            `json:"size" xml:"size,attr"`
+	ContentType        string           `json:"contentType" xml:"contentType,attr"`
+	Suffix             string           `json:"suffix" xml:"suffix,attr"`
+	Starred            *time.Time       `json:"starred,omitempty" xml:"starred,attr,omitempty"`
+	Duration           int64            `json:"duration" xml:"duration,attr"`
+	BitRate            int64            `json:"bitRate" xml:"bitRate,attr"`
+	BitDepth           int64            `json:"bitDepth" xml:"bitDepth,attr"`
+	SamplingRate       int64            `json:"samplingRate" xml:"samplingRate,attr"`
+	ChannelCount       int64            `json:"channelCount" xml:"channelCount,attr"`
+	Path               string           `json:"path" xml:"path,attr"`
+	PlayCount          int64            `json:"playCount" xml:"playCount,attr"`
+	Played             time.Time        `json:"played" xml:"played,attr"`
+	DiscNumber         int64            `json:"discNumber" xml:"discNumber,attr"`
+	Created            time.Time        `json:"created" xml:"created,attr"`
+	AlbumID            string           `json:"albumId" xml:"albumId,attr"`
+	ArtistID           string           `json:"artistId" xml:"artistId,attr"`
+	Type               string           `json:"type" xml:"type,attr"`
+	MediaType          string           `json:"mediaType" xml:"mediaType,attr"`
+	IsVideo            bool             `json:"isVideo" xml:"isVideo,attr"`
+	BPM                int64            `json:"bpm" xml:"bpm,attr"`
+	Comment            string           `json:"comment" xml:"comment,attr"`
+	SortName           string           `json:"sortName" xml:"sortName,attr"`
+	MusicBrainzID      string           `json:"musicBrainzId" xml:"musicBrainzId,attr"`
 	Isrc               []string         `json:"isrc" xml:"isrc"`
 	Genres             []ItemGenre      `json:"genres" xml:"genres"`
 	Artists            []ArtistFromSong `json:"artists" xml:"artists"`
-	DisplayArtist      string           `json:"displayArtist" xml:"displayArtist"`
+	DisplayArtist      string           `json:"displayArtist" xml:"displayArtist,attr"`
 	AlbumArtists       []ArtistID3      `json:"albumArtists" xml:"albumArtists"`
-	DisplayAlbumArtist string           `json:"displayAlbumArtist" xml:"displayAlbumArtist"`
+	DisplayAlbumArtist string           `json:"displayAlbumArtist" xml:"displayAlbumArtist,attr"`
 	Contributors       []Contributor    `json:"contributors" xml:"contributors"`
-	DisplayComposer    string           `json:"displayComposer" xml:"displayComposer"`
+	DisplayComposer    string           `json:"displayComposer" xml:"displayComposer,attr"`
 	Moods              []string         `json:"moods" xml:"moods"`
-	ExplicitStatus     string           `json:"explicitStatus" xml:"explicitStatus"`
+	ExplicitStatus     string           `json:"explicitStatus" xml:"explicitStatus,attr"`
 	ReplayGain         ReplayGain       `json:"replayGain" xml:"replayGain"`
 }
 

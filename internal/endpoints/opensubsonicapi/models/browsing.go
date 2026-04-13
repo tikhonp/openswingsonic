@@ -7,6 +7,6 @@ type MusicFolders struct {
 }
 
 type MusicFolder struct {
-	ID   int64   `json:"id" xml:"id"`
-	Name *string `json:"name,omitempty" xml:"name,omitempty"`
+	ID   int64   `json:"id" xml:"id,attr"`
+	Name *string `json:"name,omitempty" xml:"name,attr,omitempty"`
 }
