@@ -2,6 +2,7 @@
 package middleware
 
 import (
+	"encoding/xml"
 	"errors"
 	"net/http"
 
@@ -29,6 +30,22 @@ var (
 	TheRequestedDataWasNotFound              = OpenSubsonicError{Code: 70, Message: "The requested data was not found."}
 )
 
+// errorResponseXML defines the XML structure for error responses.
+type errorResponseXML struct {
+	XMLName       xml.Name        `xml:"subsonic-response"`
+	Status        string          `xml:"status,attr"`
+	Version       string          `xml:"version,attr"`
+	Type          string          `xml:"type,attr,omitempty"`
+	ServerVersion string          `xml:"serverVersion,attr,omitempty"`
+	OpenSubsonic  bool            `xml:"openSubsonic,attr,omitempty"`
+	Error         errorElementXML `xml:"error"`
+}
+
+type errorElementXML struct {
+	Code    int    `xml:"code,attr"`
+	Message string `xml:"message,attr"`
+}
+
 func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		err := next(c)
@@ -43,11 +60,8 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 
 		var errMessage string
 		var errSubsonic OpenSubsonicError
-		var invalidValidationError *validator.InvalidValidationError
-		var validationErrors validator.ValidationErrors
-		var httpErr *echo.HTTPError
 
-		if errors.As(err, &httpErr) {
+		if httpErr, ok := errors.AsType[*echo.HTTPError](err); ok {
 			if httpErr.Code == http.StatusNotFound {
 				errSubsonic = TheRequestedDataWasNotFound
 				errMessage = err.Error()
@@ -58,10 +72,10 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 		} else if errors.Is(err, swingmusic.ErrNotFound) {
 			errSubsonic = TheRequestedDataWasNotFound
 			errMessage = TheRequestedDataWasNotFound.Message
-		} else if errors.As(err, &invalidValidationError) {
+		} else if invalidValidationError, ok := errors.AsType[*validator.InvalidValidationError](err); ok {
 			errSubsonic = RequiredParametrIsMissing
 			errMessage = invalidValidationError.Error()
-		} else if errors.As(err, &validationErrors) {
+		} else if validationErrors, ok := errors.AsType[validator.ValidationErrors](err); ok {
 			errSubsonic = RequiredParametrIsMissing
 			errMessage = validationErrors.Error()
 		} else if errors.As(err, &errSubsonic) {
@@ -73,21 +87,40 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		base := util.GetBaseResponse()
-		response := map[string]any{
-			"subsonic-response": map[string]any{
-				"status":        "failed",
-				"version":       base.Version,
-				"type":          base.Type,
-				"serverVersion": base.Version,
-				"openSubsonic":  base.OpenSubsonic,
-				"error": map[string]any{
-					"code":    errSubsonic.Code,
-					"message": errMessage,
+		jsonResponse := c.QueryParam("f") == "json"
+
+		if jsonResponse {
+			// JSON response format
+			response := map[string]any{
+				"subsonic-response": map[string]any{
+					"status":        "failed",
+					"version":       base.Version,
+					"type":          base.Type,
+					"serverVersion": base.ServerVersion,
+					"openSubsonic":  base.OpenSubsonic,
+					"error": map[string]any{
+						"code":    errSubsonic.Code,
+						"message": errMessage,
+					},
 				},
-			},
+			}
+			err = c.JSON(http.StatusOK, response)
+		} else {
+			// XML response format
+			xmlResp := errorResponseXML{
+				Status:        "failed",
+				Version:       base.Version,
+				Type:          base.Type,
+				ServerVersion: base.ServerVersion,
+				OpenSubsonic:  base.OpenSubsonic,
+				Error: errorElementXML{
+					Code:    errSubsonic.Code,
+					Message: errMessage,
+				},
+			}
+			err = c.XML(http.StatusOK, xmlResp)
 		}
 
-		err = c.JSON(http.StatusOK, response)
 		if err != nil {
 			c.Logger().Error(err)
 		}

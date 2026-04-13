@@ -1,5 +1,5 @@
 package models
 
 type TopSongs struct {
-	Song []Song `json:"song"`
+	Song []Song `json:"song" xml:"song"`
 }
