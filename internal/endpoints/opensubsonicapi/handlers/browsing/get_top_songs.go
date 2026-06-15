@@ -3,7 +3,7 @@ package browsing
 import (
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
@@ -16,7 +16,7 @@ import (
 // NOTE: This implementation has limitations due to SwingMusic API constraints:
 // - Approach 1: Search for artist by name, then get their tracks (not sorted by popularity)
 // - Approach 2: Get global top tracks and filter by artist name (may miss some artists)
-func (h *BrowsingHandler) GetTopSongs(c echo.Context) error {
+func (h *BrowsingHandler) GetTopSongs(c *echo.Context) error {
 	artistName := c.QueryParam("artist")
 	if artistName == "" {
 		return middleware.RequiredParametrIsMissing
@@ -72,7 +72,7 @@ func (h *BrowsingHandler) GetTopSongs(c echo.Context) error {
 // Alternative implementation using global top tracks
 // Uncomment if you prefer this approach
 /*
-func (h *BrowsingHandler) GetTopSongs(c echo.Context) error {
+func (h *BrowsingHandler) GetTopSongs(c *echo.Context) error {
 	artistName := c.QueryParam("artist")
 	if artistName == "" {
 		return middleware.RequiredParametrIsMissing

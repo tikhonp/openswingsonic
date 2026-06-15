@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/browsing"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
@@ -94,7 +94,7 @@ func mapStarred2(starred *smmodels.Starred, client swingmusic.SwingMusicClient) 
 // GetStarred2 returns starred songs, albums and artists organized by ID3 tags.
 //
 // https://opensubsonic.netlify.app/docs/endpoints/getstarred2/
-func (h *AlbumSongListsHandler) GetStarred2(c echo.Context) error {
+func (h *AlbumSongListsHandler) GetStarred2(c *echo.Context) error {
 	starred, err := h.GetAuthedClient(c).Favorites()
 	if err != nil {
 		return err

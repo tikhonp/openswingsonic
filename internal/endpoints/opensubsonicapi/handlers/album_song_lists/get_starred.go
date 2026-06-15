@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	smmodels "github.com/tikhonp/openswingsonic/internal/swingmusic/models"
@@ -101,7 +101,7 @@ func mapStarred(starred *smmodels.Starred) osmodels.Starred {
 	return osmodels.Starred{Artist: artists, Album: albums, Song: songs}
 }
 
-func (h *AlbumSongListsHandler) GetStarred(c echo.Context) error {
+func (h *AlbumSongListsHandler) GetStarred(c *echo.Context) error {
 	starred, err := h.GetAuthedClient(c).Favorites()
 	if err != nil {
 		return err

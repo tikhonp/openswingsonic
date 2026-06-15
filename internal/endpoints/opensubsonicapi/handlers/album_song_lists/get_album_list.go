@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/swingmusic"
@@ -41,7 +41,7 @@ type GetAlbumListRquest struct {
 // GetAlbumList Returns a list of random, newest, highest rated etc. albums.
 //
 // https://opensubsonic.netlify.app/docs/endpoints/getalbumlist/
-func (h *AlbumSongListsHandler) GetAlbumList(c echo.Context) error {
+func (h *AlbumSongListsHandler) GetAlbumList(c *echo.Context) error {
 	albumList, err := h.FetchAlbumList(c)
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func (h *AlbumSongListsHandler) GetAlbumList(c echo.Context) error {
 	return utils.RenderResponse(c, "albumList", albumList)
 }
 
-func (h *AlbumSongListsHandler) GetAlbumList2(c echo.Context) error {
+func (h *AlbumSongListsHandler) GetAlbumList2(c *echo.Context) error {
 	albumList, err := h.FetchAlbumList(c)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (h *AlbumSongListsHandler) GetAlbumList2(c echo.Context) error {
 	return utils.RenderResponse(c, "albumList2", albumList)
 }
 
-func (h *AlbumSongListsHandler) FetchAlbumList(c echo.Context) (*osmodels.AlbumList, error) {
+func (h *AlbumSongListsHandler) FetchAlbumList(c *echo.Context) (*osmodels.AlbumList, error) {
 	var req GetAlbumListRquest
 	if err := c.Bind(&req); err != nil {
 		return nil, err

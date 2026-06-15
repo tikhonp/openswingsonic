@@ -1,7 +1,7 @@
 package browsing
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
@@ -10,7 +10,7 @@ import (
 
 // https://opensubsonic.netlify.app/docs/endpoints/getartistinfo/
 
-func (h *BrowsingHandler) GetArtistInfo(c echo.Context) error {
+func (h *BrowsingHandler) GetArtistInfo(c *echo.Context) error {
 	id := c.QueryParam("id")
 	if id == "" {
 		return middleware.RequiredParametrIsMissing

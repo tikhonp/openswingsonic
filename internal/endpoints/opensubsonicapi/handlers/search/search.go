@@ -3,7 +3,7 @@ package search
 import (
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/browsing"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
@@ -13,7 +13,7 @@ import (
 
 const defaultSearchCount = 20
 
-func parseCountAndOffset(c echo.Context, countKey, offsetKey string, defaultCount int) (int, int) {
+func parseCountAndOffset(c *echo.Context, countKey, offsetKey string, defaultCount int) (int, int) {
 	count := defaultCount
 	offset := 0
 
@@ -128,7 +128,7 @@ func (h *SearchHandler) fetchLimits(count, offset int) int {
 	return limit
 }
 
-func (h *SearchHandler) Search(c echo.Context) error {
+func (h *SearchHandler) Search(c *echo.Context) error {
 	query := c.QueryParam("query")
 
 	artistCount, artistOffset := parseCountAndOffset(c, "artistCount", "artistOffset", defaultSearchCount)
@@ -163,7 +163,7 @@ func (h *SearchHandler) Search(c echo.Context) error {
 	return utils.RenderResponse(c, "searchResult", result)
 }
 
-func (h *SearchHandler) Search2(c echo.Context) error {
+func (h *SearchHandler) Search2(c *echo.Context) error {
 	query := c.QueryParam("query")
 	if query == "" {
 		return middleware.RequiredParametrIsMissing
@@ -197,7 +197,7 @@ func (h *SearchHandler) Search2(c echo.Context) error {
 	return utils.RenderResponse(c, "searchResult2", result)
 }
 
-func (h *SearchHandler) Search3(c echo.Context) error {
+func (h *SearchHandler) Search3(c *echo.Context) error {
 	query := c.QueryParam("query")
 
 	artistCount, artistOffset := parseCountAndOffset(c, "artistCount", "artistOffset", defaultSearchCount)

@@ -7,7 +7,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/util"
 )
 
@@ -39,7 +39,7 @@ func marshalToInnerXML(key string, value any) (string, error) {
 
 // RenderEmptyResponse returns a successful Subsonic response with no additional data.
 // Handles both JSON (?f=json) and XML (default) formats.
-func RenderEmptyResponse(c echo.Context) error {
+func RenderEmptyResponse(c *echo.Context) error {
 	base := util.GetBaseResponse()
 
 	jsonResponse := c.QueryParam("f") == "json"
@@ -72,7 +72,7 @@ func RenderEmptyResponse(c echo.Context) error {
 // RenderResponse returns a successful Subsonic response with one additional child element.
 // The child element is named by the provided key and contains the value i.
 // Handles both JSON (?f=json) and XML (default) formats.
-func RenderResponse(c echo.Context, key string, i any) error {
+func RenderResponse(c *echo.Context, key string, i any) error {
 	base := util.GetBaseResponse()
 
 	jsonResponse := c.QueryParam("f") == "json"

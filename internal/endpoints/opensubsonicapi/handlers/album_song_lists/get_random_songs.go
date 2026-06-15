@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/browsing"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
@@ -25,7 +25,7 @@ type GetRandomSongsRequest struct {
 // GetRandomSongs returns random songs matching the given criteria.
 //
 // https://opensubsonic.netlify.app/docs/endpoints/getrandomsongs/
-func (h *AlbumSongListsHandler) GetRandomSongs(c echo.Context) error {
+func (h *AlbumSongListsHandler) GetRandomSongs(c *echo.Context) error {
 	var req GetRandomSongsRequest
 	if err := c.Bind(&req); err != nil {
 		return err

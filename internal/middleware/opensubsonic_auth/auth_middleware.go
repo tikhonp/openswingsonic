@@ -2,12 +2,12 @@
 package opensubsonicauth
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func Middleware(auth OpenSubsonicAuth) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			authParams := new(authParams)
 			if err := c.Bind(authParams); err != nil {
 				return err

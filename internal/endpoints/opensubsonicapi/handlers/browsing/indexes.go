@@ -6,7 +6,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	smmodels "github.com/tikhonp/openswingsonic/internal/swingmusic/models"
@@ -68,7 +68,7 @@ func mapArtistsToIndexes(in *smmodels.Artists) osmodels.Indexes {
 // shortcut folders → needs folder metadata
 // starred artists → needs favorites API
 // For now: this implementation is complete and correct.
-func (h *BrowsingHandler) GetIndexes(c echo.Context) error {
+func (h *BrowsingHandler) GetIndexes(c *echo.Context) error {
 	// Parameters are optional and ignored for now:
 	// musicFolderId
 	// ifModifiedSince

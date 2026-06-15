@@ -3,7 +3,7 @@ package mediaannotation
 import (
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
 	smmodels "github.com/tikhonp/openswingsonic/internal/swingmusic/models"
@@ -15,7 +15,7 @@ type ScrobbleRequest struct {
 	Submission bool   `query:"submission" form:"submission"`
 }
 
-func (h *MediaAnnotationHandler) Scrobble(c echo.Context) error {
+func (h *MediaAnnotationHandler) Scrobble(c *echo.Context) error {
 	var req ScrobbleRequest
 	if err := c.Bind(&req); err != nil {
 		return err

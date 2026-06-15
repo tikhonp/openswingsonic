@@ -3,8 +3,8 @@ package util
 import (
 	"fmt"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/tikhonp/openswingsonic/internal/config"
 )
 
@@ -17,10 +17,9 @@ func GetRequestLoggerConfig(cfg *config.Config) middleware.RequestLoggerConfig {
 		LogRemoteIP:      true,
 		LogUserAgent:     true,
 		LogContentLength: true,
-		LogError:         true,
 		LogResponseSize:  true,
 		LogLatency:       true,
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+		LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
 			if cfg.JSONLog {
 				fmt.Printf(
 					`{"time":"%s","remote_ip":"%s","host":"%s","method":"%s","uri":"%s","user_agent":"%s",`+

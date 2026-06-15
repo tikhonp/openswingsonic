@@ -3,7 +3,7 @@ package browsing
 import (
 	"path/filepath"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
@@ -54,7 +54,7 @@ func mapFolderToDirectory(folderID string, in *smmodels.Folders) osmodels.Direct
 // GetMusicDirectory Returns a listing of all files in a music directory.
 //
 // https://opensubsonic.netlify.app/docs/endpoints/getmusicdirectory/
-func (h *BrowsingHandler) GetMusicDirectory(c echo.Context) error {
+func (h *BrowsingHandler) GetMusicDirectory(c *echo.Context) error {
 	id := c.QueryParam("id")
 	if id == "" {
 		return middleware.RequiredParametrIsMissing

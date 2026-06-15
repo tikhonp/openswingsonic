@@ -1,11 +1,11 @@
 package medialibraryscanning
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 )
 
-func (h *MediaLibraryScanningHandler) StartScan(c echo.Context) error {
+func (h *MediaLibraryScanningHandler) StartScan(c *echo.Context) error {
 	err := h.GetAuthedClient(c).TriggerScan()
 	if err != nil {
 		return err

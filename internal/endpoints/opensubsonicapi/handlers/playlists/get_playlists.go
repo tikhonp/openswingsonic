@@ -3,7 +3,7 @@ package playlists
 import (
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	smmodels "github.com/tikhonp/openswingsonic/internal/swingmusic/models"
@@ -25,7 +25,7 @@ func mapPlaylistsResponse(playlists []smmodels.Playlist) []osmodels.Playlist {
 	return mapped
 }
 
-func (h *PlaylistsHandler) GetPlaylists(c echo.Context) error {
+func (h *PlaylistsHandler) GetPlaylists(c *echo.Context) error {
 	playlists, err := h.GetAuthedClient(c).Playlists()
 	if err != nil {
 		return err

@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
 	"github.com/tikhonp/openswingsonic/internal/swingmusic"
 )
 
-func (h *MediaRetrivalHandler) GetCoverArt(c echo.Context) error {
+func (h *MediaRetrivalHandler) GetCoverArt(c *echo.Context) error {
 	id := c.QueryParam("id")
 	if id == "" {
 		return middleware.RequiredParametrIsMissing

@@ -4,10 +4,11 @@ package middleware
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/swingmusic"
 	"github.com/tikhonp/openswingsonic/internal/util"
@@ -47,14 +48,15 @@ type errorElementXML struct {
 }
 
 func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		err := next(c)
 		if err == nil {
 			return nil
 		}
 
-		// Prevent double-handling if response committed
-		if c.Response().Committed {
+		// Prevent double-handling if response committed. In v5 Context.Response()
+		// returns the http.ResponseWriter, so unwrap it to reach the *echo.Response.
+		if resp, uerr := echo.UnwrapResponse(c.Response()); uerr == nil && resp.Committed {
 			return nil
 		}
 
@@ -81,7 +83,7 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 		} else if errors.As(err, &errSubsonic) {
 			errMessage = errSubsonic.Message
 		} else {
-			c.Logger().Errorf("Unhandled error type: %T, error: %v", err, err)
+			c.Logger().Error("Unhandled error type", "type", fmt.Sprintf("%T", err), "error", err)
 			errSubsonic = GenericError
 			errMessage = GenericError.Message
 		}
@@ -122,7 +124,7 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		if err != nil {
-			c.Logger().Error(err)
+			c.Logger().Error(err.Error())
 		}
 
 		return nil

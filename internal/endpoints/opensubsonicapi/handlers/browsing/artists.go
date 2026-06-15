@@ -6,7 +6,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/swingmusic"
@@ -86,7 +86,7 @@ func mapArtistsToArtistsID3(in *smmodels.Artists, c swingmusic.SwingMusicClientA
 // GetArtists Returns all artists organized according to ID3 tags.
 //
 // https://opensubsonic.netlify.app/docs/endpoints/getartists/
-func (h *BrowsingHandler) GetArtists(c echo.Context) error {
+func (h *BrowsingHandler) GetArtists(c *echo.Context) error {
 	// musicFolderId is optional and ignored for now
 	artists, err := h.GetAuthedClient(c).AllArtists("name", false)
 	if err != nil {

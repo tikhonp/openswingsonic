@@ -3,7 +3,7 @@ package mediaannotation
 import (
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
 )
@@ -34,7 +34,7 @@ func applyFavorites(update favoriteUpdater, itemType string, ids []string) error
 	return nil
 }
 
-func (h *MediaAnnotationHandler) Star(c echo.Context) error {
+func (h *MediaAnnotationHandler) Star(c *echo.Context) error {
 	trackIDs := parseIDList(c.QueryParam("id"))
 	albumIDs := parseIDList(c.QueryParam("albumId"))
 	artistIDs := parseIDList(c.QueryParam("artistId"))
@@ -58,7 +58,7 @@ func (h *MediaAnnotationHandler) Star(c echo.Context) error {
 	return utils.RenderEmptyResponse(c)
 }
 
-func (h *MediaAnnotationHandler) Unstar(c echo.Context) error {
+func (h *MediaAnnotationHandler) Unstar(c *echo.Context) error {
 	trackIDs := parseIDList(c.QueryParam("id"))
 	albumIDs := parseIDList(c.QueryParam("albumId"))
 	artistIDs := parseIDList(c.QueryParam("artistId"))

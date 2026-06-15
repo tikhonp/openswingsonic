@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/tikhonp/openswingsonic/internal/config"
 	"github.com/tikhonp/openswingsonic/internal/db"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi"
@@ -45,9 +49,11 @@ func main() {
 
 	e := echo.New()
 
-	e.Logger.SetHeader("[${time_rfc3339}] ${level} ${message}")
-	e.Debug = cfg.Debug
-	e.HideBanner = true
+	// Echo v5 dropped the Echo.Debug/HideBanner fields and replaced the custom
+	// logger with *slog.Logger. Debug mode is now expressed by letting the default
+	// HTTP error handler expose the underlying error; the banner is suppressed via
+	// StartConfig where the server is started below.
+	e.HTTPErrorHandler = echo.DefaultHTTPErrorHandler(cfg.Debug)
 	e.Validator = util.NewDefaultValidator()
 
 	e.Use(middleware.RequestLoggerWithConfig(
@@ -55,17 +61,24 @@ func main() {
 	))
 	e.Use(middleware.Recover())
 
-	e.GET("/", func(c echo.Context) error {
+	e.GET("/", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "Never gonna give you up!")
 	})
 
 	e.Pre(swmiddleware.CutViewSuffix)
 	credentialProvider, err := credentialProvider(cfg, database)
 	if err != nil {
-		e.Logger.Fatal("Failed to initialize credentials provider: ", err)
+		log.Fatal("Failed to initialize credentials provider: ", err)
 	}
 	osauth := opensubsonicauth.NewOpenSubsonicAuth(database.AuthSessions(), client, credentialProvider)
 	opensubsonicapi.ConfigureOpenSubsonicRoutes(e.Group("/rest"), osauth, client)
 
-	e.Logger.Fatal(e.Start(cfg.Addr))
+	// e.Start always prints the startup banner in v5, so start through StartConfig
+	// to keep HideBanner. The signal context mirrors e.Start's graceful shutdown.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	startConfig := echo.StartConfig{Address: cfg.Addr, HideBanner: true}
+	if err := startConfig.Start(ctx, e); err != nil {
+		log.Fatal(err)
+	}
 }

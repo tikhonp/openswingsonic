@@ -3,7 +3,7 @@ package playlists
 import (
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/handlers/browsing"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
@@ -45,7 +45,7 @@ func mapPlaylistWithEntries(pl smmodels.Playlist, tracks []smmodels.Track) osmod
 }
 
 // https://opensubsonic.netlify.app/docs/endpoints/getplaylist/
-func (h *PlaylistsHandler) GetPlaylist(c echo.Context) error {
+func (h *PlaylistsHandler) GetPlaylist(c *echo.Context) error {
 	id := c.QueryParam("id")
 	if id == "" {
 		return middleware.RequiredParametrIsMissing

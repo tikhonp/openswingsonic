@@ -1,12 +1,12 @@
 package usermanagement
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 )
 
-func (h *SystemHandler) GetUser(c echo.Context) error {
+func (h *SystemHandler) GetUser(c *echo.Context) error {
 	smUser, err := h.GetAuthedClient(c).User()
 	if err != nil {
 		return err

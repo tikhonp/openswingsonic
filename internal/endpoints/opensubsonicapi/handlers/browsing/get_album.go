@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	osmodels "github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/models"
 	"github.com/tikhonp/openswingsonic/internal/endpoints/opensubsonicapi/utils"
 	"github.com/tikhonp/openswingsonic/internal/middleware"
@@ -201,7 +201,7 @@ func mapSwingAlbumToAlbumID3WithSongs(
 
 // https://opensubsonic.netlify.app/docs/endpoints/getalbum/
 
-func (h *BrowsingHandler) GetAlbum(c echo.Context) error {
+func (h *BrowsingHandler) GetAlbum(c *echo.Context) error {
 	id := c.QueryParam("id")
 	if id == "" {
 		return middleware.RequiredParametrIsMissing
