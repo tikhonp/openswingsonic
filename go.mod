@@ -5,7 +5,7 @@ go 1.26.2
 require (
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/jmoiron/sqlx v1.4.0
-	github.com/labstack/echo/v5 v5.2.0
+	github.com/labstack/echo/v5 v5.4.1
 	github.com/ncruces/go-sqlite3 v0.35.0
 	github.com/pressly/goose/v3 v3.27.1
 )
@@ -22,10 +22,9 @@ require (
 	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.53.0 // indirect
-	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
+	golang.org/x/crypto v0.54.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/text v0.40.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 )
